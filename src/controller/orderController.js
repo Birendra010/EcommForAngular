@@ -12,7 +12,6 @@ const createOrder = async (req, res) => {
         if(!cartDetail){
             return res.status(404).send({status:false,msg:" cart not found"});
         }
-        console.log(cartDetail)
         if(cartDetail.items.length <= 0){
             return res.status(400).send({status:false,msg:" add  items in cart to place order"});
         }
@@ -48,7 +47,7 @@ const createOrder = async (req, res) => {
       cartDetail._id ,
       {$set: { items: [], totalPrice: 0, totalItems: 0 }}
       );
-    return res.status(201).send({ status: true,message:"order success", data: crearedata });
+    return res.status(201).send({ status: true,message:"order placed successfully", data: crearedata });
   } catch (err) {
     res.status(500).send({ status: false, error: err.message });
   }
@@ -60,7 +59,7 @@ const getOrder= async function (req, res) {
   try {
     let userId = req.user.userId
     //checking if the cart exist with this userId or not
-    let findOrder = await orderModel.findOne({userId:userId}) .populate("items.quantity","totalPrice ")
+    let findOrder = await orderModel.find({userId:userId}) .populate("items.productId")
 
     if (!findOrder)
       return res.status(404)

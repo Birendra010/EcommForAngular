@@ -31,7 +31,8 @@ router.put("/cart", midd.authentication, cartController.updateCart);
 //order route
 router.post("/order", midd.authentication, orderController.createOrder);
 router.get("/order", midd.authentication, orderController.getOrder);
-router.put("/order", midd.authentication, orderController.cancelOrder);
+router.put("/order/cancel", midd.authentication, orderController.cancelOrder);
+
 
 router.all("/*", (req, res) => {
   return res
