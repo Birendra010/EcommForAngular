@@ -51,7 +51,7 @@ const {isValidBody,isValidId} = require("../validators/validator")
         return res.status(201).send({status: true,message: "item added successfully",data: update});
    
     } catch (err) {
-      return res.status(500).send({ status: false, message: err.message });
+      return res.status(500).send({ status: false,error: err.message });
     }
   }
 
@@ -69,8 +69,8 @@ const {isValidBody,isValidId} = require("../validators/validator")
 
   
       return res.status(200).send({ status: true, message: "Success", cart: userCart });
-    } catch (err) {
-       return res.status(500).send({ status: false, error: err.message });
+    } catch (error) {
+       return res.status(500).send({ status: false, error: error.message });
     }
   };
 

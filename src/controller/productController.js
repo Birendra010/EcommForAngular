@@ -6,7 +6,7 @@ const createProduct = async function (req, res) {
     let {title,description,price,brand,stock,category } = req.body;
 
     if (Object.keys(req.body).length == 0 || Object.keys(req.body).length > 6) {
-      return res.status(400).send({ status: false, msg: "invalid request" });
+      return res.status(400).send({ status: false, message: "invalid request" });
     }
     const valid = productSchema.validate(req.body);
 
@@ -30,7 +30,7 @@ const getLimitedProducts = async (req, res) => {
     let products = await productModel.find().limit(20);
     return res.status(200).send({ status: true, products });
   } catch (error) {
-    return res.status(500).send({ status: false, msg: error.message });
+    return res.status(500).send({ status: false, message: error.message });
   }
 };
 
@@ -39,7 +39,7 @@ const getPopularProducts = async (req, res) => {
     let products = await productModel.find().limit(5);
     return res.status(200).send({ status: true, products });
   } catch (error) {
-    return res.status(500).send({ status: false, msg: error.message });
+    return res.status(500).send({ status: false, message: error.message });
   }
 };
 
@@ -51,7 +51,7 @@ const getAllproducts = async (req, res) => {
     let products = await productModel.find()
     return res.status(200).send({ status: true, products });
   } catch (error) {
-    return res.status(500).send({ status: false, msg: error.message });
+    return res.status(500).send({ status: false, message: error.message });
   }
 };
 const getProductById = async (req, res) => {
@@ -60,7 +60,7 @@ const getProductById = async (req, res) => {
     let product = await productModel.findById(id);
     return res.status(200).send({ status: true, product });
   } catch (error) {
-    return res.status(500).send({ status: false, msg: error.message });
+    return res.status(500).send({ status: false, message: error.message });
   }
 };
 module.exports = {

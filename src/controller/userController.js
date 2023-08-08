@@ -11,7 +11,7 @@ const signUp = async (req, res) => {
     let { email, password, name, mobile } = req.body;
 
     if (Object.keys(req.body).length == 0 || Object.keys(req.body).length > 4) {
-      return res.status(400).send({ status: false, msg: "invalid request" });
+      return res.status(400).send({ status: false, message: "invalid request" });
     }
     const valid = authSchema.validate(req.body);
 
@@ -45,7 +45,7 @@ const signUp = async (req, res) => {
         token: token,
       });
   } catch (err) {
-    res.status(500).send({ status: false, msg: err.message });
+    res.status(500).send({ status: false, message: err.message });
   }
 };
 
@@ -57,24 +57,26 @@ const loginUser = async function (req, res) {
     const Password = req.body.password;
 
     if (Object.keys(req.body).length == 0 || Object.keys(req.body).length > 2) {
-      return res.status(400).send({ status: false, msg: "invalid request" });
+      return res.status(400).send({ status: false, message: "invalid request" });
     }
 
     if (!email) {
-      return res.status(400).send({ msg: "email is not present" });
+      return res.status(400).send({ message: "email is not present" });
     }
     if (!Password) {
-      return res.status(400).send({ msg: "Password is not present" });
+      return res.status(400).send({ message: "Password is not present" });
     }
     let user = await userModel.findOne({ email: email });
     if (!user) {
       return res
         .status(404)
-        .send({ status: false, msg: "email or Password are not corerct" });
+        .send({ status: false, message: "email or Password are not corerct" });
     }
     let hashPassword = await bcrypt.compare(Password, user.password);
     if (!hashPassword) {
-      return res.status(404).send({ msg: "email or Password are not corerct" });
+      return res
+        .status(404)
+        .send({ message: "email or Password are not corerct" });
     }
     let token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRE,
@@ -110,7 +112,7 @@ const loginUser = async function (req, res) {
       .status(200)
       .send({ success: true, user: userInfo, response, token: token });
   } catch (err) {
-    return res.status(500).send({ status: false, msg: err.message });
+    return res.status(500).send({ status: false, message: err.message });
   }
 };
 
@@ -136,7 +138,7 @@ const refreshToken = (req, res) => {
       res.status(404).send("Invalid request");
     }
   } catch (error) {
-    return res.status(500).send({ msg: error.message });
+    return res.status(500).send({ message: error.message });
   }
 };
 
@@ -146,7 +148,9 @@ const forgetPassword = async (req, res) => {
     const email = req.body.email;
     const userData = await userModel.findOne({ email });
     if (!userData) {
-      return res.status(404).send({ success: false, msg: " email not found" });
+      return res
+        .status(404)
+        .send({ success: false, message: " email not found" });
     }
     if (userData) {
       const randomString = randomstring.generate();
@@ -167,13 +171,15 @@ const forgetPassword = async (req, res) => {
         .status(200)
         .send({
           success: true,
-          msg: "please check your inbox of mail and reset your password ",
+          message: "please check your inbox of mail and reset your password ",
         });
     } else {
-      res.status(400).send({ success: false, msg: "this mail does not exits" });
+      res
+        .status(400)
+        .send({ success: false, message: "this mail does not exits" });
     }
   } catch (error) {
-    res.status(400).send({ success: false, msg: error.message });
+    res.status(400).send({ success: false, message: error.message });
   }
 };
 
@@ -185,12 +191,12 @@ const updatePassword = async (req, res) => {
     if (!tokenData) {
       return res
         .status(400)
-        .send({ success: false, msg: "token expired or empty" });
+        .send({ success: false, message: "token expired or empty" });
     }
     if (tokenData.tokenExp < Date.now()) {
       return res
         .status(400)
-        .send({ success: false, msg: "this token has been expired" });
+        .send({ success: false, message: "this token has been expired" });
     }
     if (tokenData) {
       const password = req.body.newPassword;
@@ -204,14 +210,14 @@ const updatePassword = async (req, res) => {
         .status(200)
         .send({
           success: true,
-          msg: "User password has been reset",
+          message: "User password has been reset",
           data: userData,
         });
     } else {
-      res.status(400).send({ success: false, msg: "invalid token " });
+      res.status(400).send({ success: false, message: "invalid token " });
     }
   } catch (error) {
-    return res.status(400).send({ success: false, msg: error.message });
+    return res.status(400).send({ success: false, message: error.message });
   }
 };
 
@@ -235,7 +241,7 @@ const logout = async (req, res) => {
       .status(200)
       .send({ success: true, message: "Sign out successfully!" });
   } catch (error) {
-    return res.status(500).send({ success: false, msg: error.message });
+    return res.status(500).send({ success: false, message: error.message });
   }
 };
 
