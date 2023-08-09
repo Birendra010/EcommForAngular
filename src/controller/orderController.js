@@ -1,6 +1,8 @@
+const { default: mongoose } = require("mongoose");
 const cartModel = require("../model/cartModel");
 const orderModel = require("../model/orderModel");
 const productModel = require("../model/productModel");
+const ObjectId = mongoose.Types.ObjectId
 
 const createOrder = async (req, res) => {
   try {
@@ -81,7 +83,7 @@ const getOrder = async function (req, res) {
     let userId = req.user.userId;
     //checking if the cart exist with this userId or not
     let findOrder = await orderModel
-      .find({ userId: userId })
+      .find({ userId: userId,status:"pending" })
       .populate("items.productId");
 
     if (!findOrder)
@@ -179,7 +181,7 @@ const cancelProductInOrder = async (req, res) => {
         quantity = x.quantity;
       }
     });
-    const filteredProducts = userOrder.items.filter(
+    let filteredProducts = userOrder.items.filter(
       (x) => x.productId.valueOf() !== productId
     );
 
@@ -191,7 +193,7 @@ const cancelProductInOrder = async (req, res) => {
 
     product.stock += quantity;
     await product.save();
-    const updatedData = {};
+    let updatedData = {};
 
     // if no products left after filteration
     if (filteredProducts.length === 0) {

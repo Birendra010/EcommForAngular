@@ -28,7 +28,7 @@ const {isValidBody,isValidId} = require("../validators/validator")
           cart.totalItems = 1;
           cart.totalPrice = product.price
           const newCart = await cartModel.create(cart)
-          return res.status(201).send({ status: false,message:"item added successfully",newCart });
+          return res.status(201).send({ status: false,message:"item added successfully",cart:newCart });
         }
         let quantity = 1;
         let arr = userCart.items;
@@ -48,7 +48,7 @@ const {isValidBody,isValidId} = require("../validators/validator")
         cart.totalPrice = userCart.totalPrice + (price * quantity)
         cart.totalItems = arr.length;
         let update = await cartModel.findByIdAndUpdate(userCart._id,cart,{new:true}) 
-        return res.status(201).send({status: true,message: "item added successfully",data: update});
+        return res.status(201).send({status: true,message: "item added successfully",cart: update});
    
     } catch (err) {
       return res.status(500).send({ status: false,error: err.message });
@@ -90,6 +90,7 @@ const updateCart = async (req, res) => {
         .send({ status: false, message: "please provide productId" });
     }
     let product = await productModel.findById(productId);
+    // console.log(product)
     if (!product) {
       return res
         .status(404)
@@ -117,7 +118,7 @@ const updateCart = async (req, res) => {
     const cartItem = userCart.items[item];
     if (quantity < 1) {
       let totalItems = userCart.totalItems - cartItem.quantity;
-      let totalPrice = userCart.totalPrice - cartItem.quantity * product.price;
+      let totalPrice = userCart.totalPrice - (cartItem.quantity * product.price);
       let cart = await cartModel
         .findByIdAndUpdate(
           userCart._id,
