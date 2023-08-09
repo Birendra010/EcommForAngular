@@ -117,7 +117,7 @@ const updateCart = async (req, res) => {
     let updatedCart = {};
     const cartItem = userCart.items[item];
     if (quantity < 1) {
-      let totalItems = userCart.totalItems - cartItem.quantity;
+      let totalItems = userCart.totalItems - 1;
       let totalPrice = userCart.totalPrice - (cartItem.quantity * product.price);
       let cart = await cartModel
         .findByIdAndUpdate(
@@ -134,7 +134,7 @@ const updateCart = async (req, res) => {
         .send({ status: true, message: "cart updated", cart: cart });
     } else if (quantity < cartItem.quantity) {
       updatedCart.items = userCart.items;
-      updatedCart.totalItems = userCart.totalItems - 1;
+      updatedCart.totalItems = userCart.totalItems ;
       updatedCart.totalPrice =
         userCart.totalPrice +
         (quantity * product.price - cartItem.quantity * product.price);
@@ -147,7 +147,7 @@ const updateCart = async (req, res) => {
         .send({ status: true, message: "cart updated", cart: cart });
     } else {
       updatedCart.items = userCart.items;
-      updatedCart.totalItems = userCart.totalItems + 1;
+      updatedCart.totalItems = userCart.totalItems;
       updatedCart.totalPrice =
         userCart.totalPrice +
         (quantity * product.price - cartItem.quantity * product.price);

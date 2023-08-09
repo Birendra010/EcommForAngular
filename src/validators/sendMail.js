@@ -19,7 +19,6 @@ const sendResetPasswordMail = async(email,token)=>{
         from: process.env.USER_EMAIL,
         to: email,
         subject: "for reset password",
-        // html: "http://192.168.1.64:4200/resetPassword?token=" + token + "",
 
         html: `<h2>Hlo  </h2>
                       <h3>Copy this link to update your password</h3>

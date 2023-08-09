@@ -2,7 +2,7 @@ const { default: mongoose } = require("mongoose");
 const cartModel = require("../model/cartModel");
 const orderModel = require("../model/orderModel");
 const productModel = require("../model/productModel");
-const ObjectId = mongoose.Types.ObjectId
+const ObjectId = mongoose.Types.ObjectId;
 
 const createOrder = async (req, res) => {
   try {
@@ -19,6 +19,7 @@ const createOrder = async (req, res) => {
         .status(404)
         .send({ status: false, message: " cart not found" });
     }
+    // console.log(cartDetail.items.length);
     if (cartDetail.items.length === 0) {
       return res
         .status(400)
@@ -28,13 +29,11 @@ const createOrder = async (req, res) => {
       (i) => i.quantity > i.productId.stock
     );
     if (filter.length > 0) {
-      return res
-        .status(400)
-        .send({
-          status: false,
-          message: "some product are out of stock",
-          filter,
-        });
+      return res.status(400).send({
+        status: false,
+        message: "some product are out of stock",
+        filter,
+      });
     }
     let order = {
       userId,
@@ -66,13 +65,11 @@ const createOrder = async (req, res) => {
     await cartModel.findByIdAndUpdate(cartDetail._id, {
       $set: { items: [], totalPrice: 0, totalItems: 0 },
     });
-    return res
-      .status(201)
-      .send({
-        status: true,
-        message: "order placed successfully",
-        data: crearedata,
-      });
+    return res.status(201).send({
+      status: true,
+      message: "order placed successfully",
+      data: crearedata,
+    });
   } catch (err) {
     res.status(500).send({ status: false, error: err.message });
   }
@@ -83,7 +80,7 @@ const getOrder = async function (req, res) {
     let userId = req.user.userId;
     //checking if the cart exist with this userId or not
     let findOrder = await orderModel
-      .find({ userId: userId,status:"pending" })
+      .find({ userId: userId, status: "pending" })
       .populate("items.productId");
 
     if (!findOrder)
@@ -99,10 +96,9 @@ const getOrder = async function (req, res) {
   }
 };
 
-
 const getOrderById = async (req, res) => {
   try {
-     let userId = req.user.userId;
+    let userId = req.user.userId;
     let orderId = req.params.orderId;
     let order = await orderModel
       .findOne({
@@ -121,10 +117,6 @@ const getOrderById = async (req, res) => {
     return res.status(500).send({ error: error.message });
   }
 };
-
-
-
-
 
 const cancelProductInOrder = async (req, res) => {
   try {
@@ -271,38 +263,50 @@ const cancelProductInOrder = async (req, res) => {
 //   }
 // };
 
-
 const cancelOrder = async (req, res) => {
   try {
     let orderId = req.params.orderId;
     let userId = req.user.userId;
     if (!orderId) {
-      return res.status(400).send({ status: false, msg: "Please provide orderId" })
+      return res
+        .status(400)
+        .send({ status: false, msg: "Please provide orderId" });
     }
     if (!ObjectId.isValid(orderId)) {
-      return res.status(400).send({ status: false, msg: "invlid orderId" })
+      return res.status(400).send({ status: false, msg: "invlid orderId" });
     }
     let userOrder = await orderModel.findById(orderId);
 
     if (userId.valueOf() != userOrder.userId.valueOf()) {
-      return res.status(403).send({ status: false, msg: "Forbidden you have not access to update this" })
+      return res
+        .status(403)
+        .send({
+          status: false,
+          msg: "Forbidden you have not access to update this",
+        });
     }
     if (userOrder.status !== "pending") {
-      return res.status(400).send({ status: false, msg: "Order cannot be cancel" })
+      return res
+        .status(400)
+        .send({ status: false, msg: "Order cannot be cancel" });
     }
     userOrder.items.forEach(async (product) => {
-      await productModel.findByIdAndUpdate(product.productId, { $inc: { stock: +product.quantity } }, { new: true })
-    })
-    const order = await orderModel.findByIdAndUpdate(orderId, { $set: { status: "canceled" } }, { new: true })
-    return res.status(200).send({ status: true, msg: "order cancled", order })
+      await productModel.findByIdAndUpdate(
+        product.productId,
+        { $inc: { stock: +product.quantity } },
+        { new: true }
+      );
+    });
+    const order = await orderModel.findByIdAndUpdate(
+      orderId,
+      { $set: { status: "canceled" } },
+      { new: true }
+    );
+    return res.status(200).send({ status: true, msg: "order cancled", order });
   } catch (error) {
-    return res.status(500).send({ error: error.message })
+    return res.status(500).send({ error: error.message });
   }
-
-
-}
-
-
+};
 
 module.exports = {
   createOrder,
