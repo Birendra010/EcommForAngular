@@ -21,7 +21,7 @@ const sendResetPasswordMail = async(email,token)=>{
         subject: "for reset password",
 
         html: `<h2>Hlo  </h2>
-                      <h3>Copy this link to update your password</h3>
+                      <h3>Click this link to update your password</h3>
                       <br/>
                       <h3>Link :  ${process.env.HOST_URL}/resetPassword/${token}</h3>`,
       };
@@ -41,4 +41,18 @@ const sendResetPasswordMail = async(email,token)=>{
     }
 
 
-    module.exports = {sendResetPasswordMail}
+module.exports = { sendResetPasswordMail }
+    
+
+
+
+
+
+
+
+
+
+
+
+
+

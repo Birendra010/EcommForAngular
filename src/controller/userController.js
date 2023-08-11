@@ -35,15 +35,12 @@ const signUp = async (req, res) => {
     let token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRE,
     });
-    return res
-      .cookie("x-api-key", token)
-      .status(201)
-      .send({
-        status: true,
-        message: "Success",
-        data: savedData,
-        token: token,
-      });
+    return res.cookie("x-api-key", token).status(201).send({
+      status: true,
+      message: " signup seccessfully",
+      data: savedData,
+      token: token,
+    });
   } catch (err) {
     res.status(500).send({ status: false, message: err.message });
   }
@@ -52,6 +49,7 @@ const signUp = async (req, res) => {
 ///login user
 
 const loginUser = async function (req, res) {
+
   try {
     const email = req.body.email;
     const Password = req.body.password;
@@ -69,13 +67,13 @@ const loginUser = async function (req, res) {
     let user = await userModel.findOne({ email: email });
     if (!user) {
       return res
-        .status(404)
+        .status(409)
         .send({ status: false, message: "email or Password are not corerct" });
     }
     let hashPassword = await bcrypt.compare(Password, user.password);
     if (!hashPassword) {
       return res
-        .status(404)
+        .status(409)
         .send({ message: "email or Password are not corerct" });
     }
     let token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
@@ -110,7 +108,7 @@ const loginUser = async function (req, res) {
     };
     res
       .status(200)
-      .send({ success: true, user: userInfo, response, token: token });
+      .send({ success: true, user: userInfo, message:" login seccessfully" ,response, token: token });
   } catch (err) {
     return res.status(500).send({ status: false, message: err.message });
   }
@@ -135,7 +133,7 @@ const refreshToken = (req, res) => {
       };
       res.status(200).json(response);
     } else {
-      res.status(404).send("Invalid request");
+      res.status(404).send({message:"Invalid request"});
     }
   } catch (error) {
     return res.status(500).send({ message: error.message });

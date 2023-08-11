@@ -98,7 +98,7 @@ const updateCart = async (req, res) => {
     }
     if (quantity > product.stock) {
       return res
-        .status(404)
+        .status(400)
         .send({
           status: false,
           message: `maximum quantiy to buy is ${product.stock}`,
