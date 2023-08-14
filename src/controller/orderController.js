@@ -29,9 +29,9 @@ const createOrder = async (req, res) => {
       (i) => i.quantity > i.productId.stock
     );
     if (filter.length > 0) {
-      return res.status(400).send({
+      return res.status(404).send({
         status: false,
-        message: "some product are out of stock",
+        message: " out of stock",
         filter,
       });
     }
@@ -70,7 +70,7 @@ const createOrder = async (req, res) => {
       message: "order placed successfully",
       data: crearedata,
     });
-  } catch (err) {
+  } catch (err) {YOUR_SERVER_ENDPOINT;
     res.status(500).send({ status: false, error: err.message });
   }
 };
