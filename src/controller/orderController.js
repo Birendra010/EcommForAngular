@@ -70,7 +70,7 @@ const createOrder = async (req, res) => {
       message: "order placed successfully",
       data: crearedata,
     });
-  } catch (err) {YOUR_SERVER_ENDPOINT;
+  } catch (err) {
     res.status(500).send({ status: false, error: err.message });
   }
 };

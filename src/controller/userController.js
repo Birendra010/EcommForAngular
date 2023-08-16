@@ -5,6 +5,10 @@ const { authSchema } = require("../validators/schemaValidation");
 const randomstring = require("randomstring");
 const { sendResetPasswordMail } = require("../validators/sendMail");
 
+
+
+
+
 //register user
 const signUp = async (req, res) => {
   try {
@@ -46,8 +50,15 @@ const signUp = async (req, res) => {
   }
 };
 
-///login user
 
+
+
+
+///login user
+let UserIdToLocal
+const getUserId = ( ) => {
+  return UserIdToLocal
+}
 const loginUser = async function (req, res) {
 
   try {
@@ -244,6 +255,7 @@ const logout = async (req, res) => {
 };
 
 module.exports = {
+  getUserId,
   signUp,
   loginUser,
   updatePassword,

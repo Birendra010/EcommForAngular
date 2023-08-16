@@ -1,6 +1,7 @@
 const productModel = require("../model/productModel");
 const cartModel = require("../model/cartModel");
 const { isValidBody, isValidId } = require("../validators/validator");
+const {getUserId} = require ("./userController.js")
 
 const createCart = async function (req, res) {
   try {
@@ -80,6 +81,72 @@ const getCartDetails = async function (req, res) {
   }
 };
 
+
+
+const addToCartFromLocalStorage = async (req, res) => {
+  // console.log(req.body);
+  try {
+    let userId = getUserId();
+    let { items } = req.body;
+    let userCart = await cartModel
+      .findOne({ userId })
+      .populate("items.productId");
+    console.log(userCart)
+    if (!userCart) {
+      let cartDetails = {
+        userId,
+        items: items,
+        totalPrice: req.body.totalPrice,
+        totalItems: req.body.totalItems,
+      };
+      let newCart = await cartModel.create(cartDetails);
+      return res
+        .status(201)
+        .send({ status: true, msg: "Items added to cart", cart: newCart });
+    } else {
+      let totalItems = 0;
+      let totalPrice = 0;
+
+      userCart.items.forEach((x) => {
+        let id = x.productId._id.toString();
+        items.map((y) => {
+          if (y.productId._id === id) {
+            x.quantity += y.quantity;
+          }
+        });
+        // tItems = x.quantity
+      });
+
+      items.forEach((secondItem) => {
+        const existingItem = userCart.items.find(
+          (item) =>
+            item.productId._id.toString() ===
+            secondItem.productId._id.toString()
+        );
+
+        if (!existingItem) {
+          userCart.items.push(secondItem);
+        }
+      });
+
+      userCart.items.forEach((x) => {
+        totalItems += x.quantity;
+        totalPrice += x.quantity * x.productId.price;
+      });
+
+      userCart.items = userCart.items;
+      userCart.totalPrice = totalPrice;
+      userCart.totalItems = totalItems;
+      userCart.save();
+
+      return res.status(200).send({ cart: userCart });
+    }
+  } catch (error) {
+    return res.status(500).send({ status: false, error: error.message });
+  }
+};
+
+
 const updateCart = async (req, res) => {
   try {
     let userId = req.user.userId;
@@ -92,7 +159,7 @@ const updateCart = async (req, res) => {
         .status(400)
         .send({ status: false, message: "please provide productId" });
     }
-    let product = await productModel.findById(productId);
+    let product = await productModel.findById(productId._id);
     // console.log(product)
     if (!product) {
       return res
@@ -107,7 +174,7 @@ const updateCart = async (req, res) => {
     }
     let userCart = await cartModel.findOne({ userId });
 
-    let item = userCart.items.findIndex((item) => item.productId == productId);
+    let item = userCart.items.findIndex((item) => item.productId == productId._id);
     if (item === -1) {
       return res
         .status(404)
@@ -149,7 +216,7 @@ const updateCart = async (req, res) => {
         .send({ status: true, message: "cart updated", cart: cart });
     } else {
       updatedCart.items = userCart.items;
-      updatedCart.totalItems = userCart.totalItems;
+      updatedCart.totalItems = userCart.totalItems+1;
       updatedCart.totalPrice =
         userCart.totalPrice +
         (quantity * product.price - cartItem.quantity * product.price);
@@ -166,4 +233,4 @@ const updateCart = async (req, res) => {
   }
 };
 
-module.exports = { createCart, getCartDetails, updateCart };
+module.exports = { createCart, getCartDetails, updateCart ,addToCartFromLocalStorage};

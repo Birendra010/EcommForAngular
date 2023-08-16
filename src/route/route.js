@@ -5,7 +5,7 @@ const productCotroller = require("../controller/productController");
 const cartController = require("../controller/cartController");
 const orderController = require("../controller/orderController");
 const midd = require("../middleware/auth");
-// const stripeController = require("../controller/stripeController")
+const stripeController = require("../controller/stripeController")
 
 //user route
 router.post("/signup", userController.signUp);
@@ -26,7 +26,7 @@ router.get("/getProductById/:id", productCotroller.getProductById);
 router.post("/cart", midd.authentication, cartController.createCart);
 router.get("/cart", midd.authentication, cartController.getCartDetails);
 router.put("/cart", midd.authentication, cartController.updateCart);
-// router.put("/local-cart", midd.authentication, cartController.updateCart);
+router.put( "/local-cart", midd.authentication, cartController.addToCartFromLocalStorage);
 
 
 
@@ -42,11 +42,9 @@ router.put("/order/cancel/:orderId", midd.authentication, orderController.cancel
 
 
 
-
-///payment
-// router.post("/create-payment-intent", stripeController.createPaymentIntent);
-
-
+//payment 
+router.post("/payment", stripeController.payment)
+router.post("/paymentStatus", stripeController.paymentStatus);
 
 
 
