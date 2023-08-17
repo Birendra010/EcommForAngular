@@ -2,46 +2,72 @@ const { default: mongoose } = require("mongoose");
 const cartModel = require("../model/cartModel");
 const orderModel = require("../model/orderModel");
 const productModel = require("../model/productModel");
+const { orderSchema } = require("../validators/schemaValidation");
 const ObjectId = mongoose.Types.ObjectId;
 
 const createOrder = async (req, res) => {
   try {
-    let userId = req.user.userId;
-    let { name, phone, house, city, state, pincode, productId } = req.body;
+    let { userId, items, totalItems, totalPrice } = req.body.order;
+    let { bname, name,email, phone, house, city, state, pincode } = req.body.form;
 
-    //////input validation
-    let cartDetail = await cartModel
-      .findOne({ userId })
-      .populate("items.productId", "stock");
-    // console.log(cartDetail);
-    if (!cartDetail) {
-      return res
-        .status(404)
-        .send({ status: false, message: " cart not found" });
+    if (email.length) {
+      const orderDetails = {
+        name: bname,
+        email,
+        items,
+        totalItems: totalItems,
+        totalPrice: totalPrice,
+        products: items,
+
+        shippingInfo: {
+          name: name,
+          phone: phone,
+          address: {
+            house: house,
+            city: city,
+            state: state,
+            pincode: pincode,
+          },
+        },
+      };
+   
+
+    let order = await orderModel.create(orderDetails)
+    items.forEach(async (item) => {
+      await productModel.findByIdAndUpdate(
+        item.productId._id,
+        { $inc: { stock: -item.quantity } },
+        { new: true }
+      );
+    });
+      
+    return res.status(201).send({ status: true, message: "Order placed ", order })
+    } else {
+      
+      let cart = await cartModel.findOne({ userId: userId }).populate("items.productId", "stock")
+      console.log(cart);
+    if (!cart) {
+      return res.status(404).send({ status: false, msg: "User cart not found" });
     }
-    // console.log(cartDetail.items.length);
-    if (cartDetail.items.length === 0) {
+    if (cart.items.length <= 0) {
       return res
         .status(400)
-        .send({ status: false, message: " add  items in cart to place order" });
+        .send({
+          status: false,
+          msg: "Please add some items in cart to place order",
+        });
     }
-    const filter = cartDetail.items.filter(
-      (i) => i.quantity > i.productId.stock
-    );
+    const filter = cart.items.filter((x) => x.quantity > x.productId.stock);
     if (filter.length > 0) {
-      return res.status(404).send({
-        status: false,
-        message: " out of stock",
-        filter,
-      });
+      return res.status(400).send({ status: false, msg: "some product are out of stock", filter })
     }
+    
     let order = {
       userId,
-      items: cartDetail.items,
-      totalPrice: cartDetail.totalPrice,
-      totalItems: cartDetail.totalItems,
-      poducts: cartDetail.items,
-
+      items,
+      totalItems: totalItems,
+      totalPrice: totalPrice,
+      products: items,
       shippingInfo: {
         name: name,
         phone: phone,
@@ -53,27 +79,98 @@ const createOrder = async (req, res) => {
         },
       },
     };
-    let crearedata = await orderModel.create(order);
-
-    cartDetail.items.forEach(async (item) => {
+    let userOrder = await orderModel.create(order)
+    cart.items.forEach(async (item) => {
       await productModel.findByIdAndUpdate(
         item.productId._id,
         { $inc: { stock: -item.quantity } },
         { new: true }
       );
     });
-    await cartModel.findByIdAndUpdate(cartDetail._id, {
-      $set: { items: [], totalPrice: 0, totalItems: 0 },
-    });
-    return res.status(201).send({
-      status: true,
-      message: "order placed successfully",
-      data: crearedata,
-    });
-  } catch (err) {
-    res.status(500).send({ status: false, error: err.message });
+    await cartModel.findByIdAndUpdate(
+      cart._id,
+      { $set: { items: [], totalItems: 0, totalPrice: 0 } },
+      { new: true }
+    );
+    return res.status(200).send({ status: true, msg: "Order Done", userOrder })
   }
-};
+} catch (error) {
+        return res.status(500).send({error:error.message})
+    }
+  }
+
+
+
+
+
+
+
+
+//     //////input validation
+//     let cartDetail = await cartModel
+//       .findOne({ userId })
+//       .populate("items.productId", "stock");
+//     // console.log(cartDetail);
+//     if (!cartDetail) {
+//       return res
+//         .status(404)
+//         .send({ status: false, message: " cart not found" });
+//     }
+//     // console.log(cartDetail.items.length);
+//     if (cartDetail.items.length === 0) {
+//       return res
+//         .status(400)
+//         .send({ status: false, message: " add  items in cart to place order" });
+//     }
+//     const filter = cartDetail.items.filter(
+//       (i) => i.quantity > i.productId.stock
+//     );
+//     if (filter.length > 0) {
+//       return res.status(404).send({
+//         status: false,
+//         message: " out of stock",
+//         filter,
+//       });
+//     }
+//     let order = {
+//       userId,
+//       items: cartDetail.items,
+//       totalPrice: cartDetail.totalPrice,
+//       totalItems: cartDetail.totalItems,
+//       poducts: cartDetail.items,
+
+//       shippingInfo: {
+//         name: name,
+//         phone: phone,
+//         address: {
+//           house: house,
+//           city: city,
+//           state: state,
+//           pincode: pincode,
+//         },
+//       },
+//     };
+//     let crearedata = await orderModel.create(order);
+
+//     cartDetail.items.forEach(async (item) => {
+//       await productModel.findByIdAndUpdate(
+//         item.productId._id,
+//         { $inc: { stock: -item.quantity } },
+//         { new: true }
+//       );
+//     });
+//     await cartModel.findByIdAndUpdate(cartDetail._id, {
+//       $set: { items: [], totalPrice: 0, totalItems: 0 },
+//     });
+//     return res.status(201).send({
+//       status: true,
+//       message: "order placed successfully",
+//       data: crearedata,
+//     });
+//   } catch (err) {
+//     res.status(500).send({ status: false, error: err.message });
+//   }
+// };
 
 const getOrder = async function (req, res) {
   try {
@@ -278,12 +375,10 @@ const cancelOrder = async (req, res) => {
     let userOrder = await orderModel.findById(orderId);
 
     if (userId.valueOf() != userOrder.userId.valueOf()) {
-      return res
-        .status(403)
-        .send({
-          status: false,
-          msg: "Forbidden you have not access to update this",
-        });
+      return res.status(403).send({
+        status: false,
+        msg: "Forbidden you have not access to update this",
+      });
     }
     if (userOrder.status !== "pending") {
       return res

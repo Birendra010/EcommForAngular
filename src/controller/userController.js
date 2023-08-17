@@ -117,6 +117,7 @@ const loginUser = async function (req, res) {
     const userInfo = {
       email: user.email,
     };
+    UserIdToLocal=user._id
     res
       .status(200)
       .send({ success: true, user: userInfo, message:" login seccessfully" ,response, token: token });

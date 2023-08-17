@@ -1,3 +1,4 @@
+const { string, required } = require("joi");
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
@@ -16,9 +17,8 @@ const orderSchema = new mongoose.Schema(
           ref: "Product",
         }, //ObjectId, refs to Product model
         quantity: { type: Number, require: true, default: 1 },
-        _id:false
+        _id: false,
       },
-      
     ],
     totalPrice: {
       type: Number,
@@ -33,11 +33,10 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       require: ["Holds total number of quantity in the cart"],
     },
-    status:{
-      type:String,
-      enum:["pending", "completed", "canceled"],
-      default:"pending"
-
+    status: {
+      type: String,
+      enum: ["pending", "completed", "canceled"],
+      default: "pending",
     },
 
     shippingInfo: {
@@ -74,7 +73,20 @@ const orderSchema = new mongoose.Schema(
         },
       },
     },
+    email: {
+      type: String,
+      required: true
+},
+    paymentStatus: {
+      type: String,
+      default: "payment_pending",
+    },
+    paymentId: {
+      type: String,
+      default: "",
+    },
   },
+
   { timestamps: true }
 );
 
