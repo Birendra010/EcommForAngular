@@ -17,15 +17,15 @@ const payment = async (req, res, next) => {
           currency: "INR",
           product_data: {
             name: item.productId.title,
-            images: item.productId.images
+            images: item.productId.images,
           },
           unit_amount: item.productId.price * 100,
         },
         quantity: item.quantity,
       })),
       mode: "payment",
-      success_url: "http://192.168.1.64:4200/success",
-      cancel_url: "http://192.168.1.64:4200/failed",
+      success_url: `${process.env.HOST_URL}/success`,
+      cancel_url: `${process.env.HOST_URL}/failed`,
     });
     if (req.body.form.email) {
       let order = await orderModel.findOne({
