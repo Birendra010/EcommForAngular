@@ -4,6 +4,9 @@ const orderModel = require("../model/orderModel");
 const productModel = require("../model/productModel");
 const { orderSchema } = require("../validators/schemaValidation");
 const ObjectId = mongoose.Types.ObjectId;
+const validObjectId = function (objectId) {
+  return mongoose.Types.ObjectId.isValid(objectId);
+};
 
 const createOrder = async (req, res) => {
   try {
@@ -44,30 +47,34 @@ const createOrder = async (req, res) => {
     return res.status(201).send({ status: true, message: "Order placed ", order })
     } else {
       
-      let cart = await cartModel.findOne({ userId: userId }).populate("items.productId", "stock")
-      console.log(cart);
-    if (!cart) {
-      return res.status(404).send({ status: false, msg: "User cart not found" });
-    }
-    if (cart.items.length <= 0) {
+      let cartDetail = await cartModel.findOne({ userId: userId }).populate("items.productId", "stock")
+      
+    if (!cartDetail) {
       return res
-        .status(400)
-        .send({
-          status: false,
-          msg: "Please add some items in cart to place order",
-        });
+        .status(404)
+        .send({ status: false, msg: "User cart not found" });
     }
-    const filter = cart.items.filter((x) => x.quantity > x.productId.stock);
+    if (cartDetail.items.length <= 0) {
+      return res.status(400).send({
+        status: false,
+        msg: "Please add some items in cart to place order",
+      });
+    }
+      
+      // console.log(cartDetail);
+    const filter = cartDetail.items.filter(
+      (x) => x.quantity > x.productId.stock
+    );
     if (filter.length > 0) {
-      return res.status(400).send({ status: false, msg: "some product are out of stock", filter })
+      return res.status(400).send({ status: false, message: "some product are out of stock", filter })
     }
     
     let order = {
       userId,
-      items,
+      items:cartDetail.items,
       totalItems: totalItems,
       totalPrice: totalPrice,
-      products: items,
+      products:items,
       shippingInfo: {
         name: name,
         phone: phone,
@@ -79,20 +86,23 @@ const createOrder = async (req, res) => {
         },
       },
     };
-    let userOrder = await orderModel.create(order)
-    cart.items.forEach(async (item) => {
+    let crearedata = await orderModel.create(order)
+    cartDetail.items.forEach(async (item) => {
       await productModel.findByIdAndUpdate(
         item.productId._id,
         { $inc: { stock: -item.quantity } },
         { new: true }
       );
     });
-    await cartModel.findByIdAndUpdate(
-      cart._id,
+ await cartModel.findByIdAndUpdate(
+      cartDetail._id,
       { $set: { items: [], totalItems: 0, totalPrice: 0 } },
       { new: true }
     );
-    return res.status(200).send({ status: true, msg: "Order Done", userOrder })
+      
+    return res
+      .status(200)
+      .send({ status: true, message: "order placed successfully", data:crearedata });
   }
 } catch (error) {
         return res.status(500).send({error:error.message})
@@ -100,78 +110,7 @@ const createOrder = async (req, res) => {
   }
 
 
-
-
-
-
-
-
-//     //////input validation
-//     let cartDetail = await cartModel
-//       .findOne({ userId })
-//       .populate("items.productId", "stock");
-//     // console.log(cartDetail);
-//     if (!cartDetail) {
-//       return res
-//         .status(404)
-//         .send({ status: false, message: " cart not found" });
-//     }
-//     // console.log(cartDetail.items.length);
-//     if (cartDetail.items.length === 0) {
-//       return res
-//         .status(400)
-//         .send({ status: false, message: " add  items in cart to place order" });
-//     }
-//     const filter = cartDetail.items.filter(
-//       (i) => i.quantity > i.productId.stock
-//     );
-//     if (filter.length > 0) {
-//       return res.status(404).send({
-//         status: false,
-//         message: " out of stock",
-//         filter,
-//       });
-//     }
-//     let order = {
-//       userId,
-//       items: cartDetail.items,
-//       totalPrice: cartDetail.totalPrice,
-//       totalItems: cartDetail.totalItems,
-//       poducts: cartDetail.items,
-
-//       shippingInfo: {
-//         name: name,
-//         phone: phone,
-//         address: {
-//           house: house,
-//           city: city,
-//           state: state,
-//           pincode: pincode,
-//         },
-//       },
-//     };
-//     let crearedata = await orderModel.create(order);
-
-//     cartDetail.items.forEach(async (item) => {
-//       await productModel.findByIdAndUpdate(
-//         item.productId._id,
-//         { $inc: { stock: -item.quantity } },
-//         { new: true }
-//       );
-//     });
-//     await cartModel.findByIdAndUpdate(cartDetail._id, {
-//       $set: { items: [], totalPrice: 0, totalItems: 0 },
-//     });
-//     return res.status(201).send({
-//       status: true,
-//       message: "order placed successfully",
-//       data: crearedata,
-//     });
-//   } catch (err) {
-//     res.status(500).send({ status: false, error: err.message });
-//   }
-// };
-
+///get all orders 
 const getOrder = async function (req, res) {
   try {
     let userId = req.user.userId;
@@ -192,7 +131,7 @@ const getOrder = async function (req, res) {
     return res.status(500).send({ status: false, error: err.message });
   }
 };
-
+///get order by orderId 
 const getOrderById = async (req, res) => {
   try {
     let userId = req.user.userId;
@@ -214,6 +153,7 @@ const getOrderById = async (req, res) => {
     return res.status(500).send({ error: error.message });
   }
 };
+
 
 const cancelProductInOrder = async (req, res) => {
   try {
@@ -327,39 +267,6 @@ const cancelProductInOrder = async (req, res) => {
   }
 };
 
-// const cancelOrder = async function (req, res) {
-//   try {
-//     let userId = req.user.userId;
-//     let data = req.body;
-//     let { productId } = data;
-//     let orderDetails = await orderModel
-//       .findOne({ userId, status: "pending" })
-//       .populate("items.productId");
-//     if (!orderDetails) {
-//       return res
-//         .status(400)
-//         .send({ success: false, message: "items cenceled already" });
-//     }
-//     orderDetails.items.forEach(async (item) => {
-//       await productModel.findByIdAndUpdate(
-//         item.productId,
-//         { $inc: { stock: +item.quantity } },
-//         { new: true }
-//       );
-//     });
-//     let orderStatus = await orderModel.findByIdAndUpdate(
-//       orderDetails._id,
-//       { $set: { status: "cancelled" } },
-//       { new: true }
-//     );
-//     return res
-//       .status(200)
-//       .send({ status: true, message: "Success", data: orderStatus });
-//   } catch (error) {
-//     return res.status(500).send({ status: false, error: error.message });
-//   }
-// };
-
 const cancelOrder = async (req, res) => {
   try {
     let orderId = req.params.orderId;
@@ -403,10 +310,35 @@ const cancelOrder = async (req, res) => {
   }
 };
 
+//track order by guest user only
+const trackOrderById = async (req, res) => {
+  try {
+    let orderId = req.params.orderId;
+    if (!validObjectId(orderId)) {
+      return res
+        .status(400)
+        .send({ status: false, msg: "Please enter a valid orderId" });
+    }
+    let order = await orderModel
+      .findOne({ _id: orderId })
+      .populate("items.productId");
+    //  if order not found with orderId or order doesn't have email in it.
+    if (!order || !order.email) {
+      return res
+        .status(400)
+        .send({ status: false, msg: "You have not completed any order" });
+    }
+    return res.status(200).send({ status: true, msg: "Order details", order });
+  } catch (error) {
+    return res.status(500).send({ error: error.message });
+  }
+};
+
 module.exports = {
   createOrder,
   getOrder,
   cancelOrder,
   cancelProductInOrder,
   getOrderById,
+  trackOrderById,
 };

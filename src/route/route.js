@@ -29,23 +29,18 @@ router.put("/cart", midd.authentication, cartController.updateCart);
 router.put( "/local-cart", midd.authentication, cartController.addToCartFromLocalStorage);
 
 
-
-
-
 //order route
 router.post("/order",  orderController.createOrder);
 router.get("/order", midd.authentication, orderController.getOrder);
+router.get("/track/:orderId", orderController.trackOrderById);
 router.get("/order/:orderId" , midd.authentication,orderController.getOrderById)
 router.put("/order/:orderId", midd.authentication, orderController.cancelProductInOrder);
 router.put("/order/cancel/:orderId", midd.authentication, orderController.cancelOrder);
 
 
-
-
 //payment 
 router.post("/payment", stripeController.payment)
 router.post("/paymentStatus", stripeController.paymentStatus);
-
 
 
 router.all("/*", (req, res) => {

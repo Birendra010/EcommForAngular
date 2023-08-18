@@ -35,8 +35,8 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "completed", "canceled"],
-      default: "pending",
+      enum: ["delivered", "completed", "canceled"],
+      default: "completed",
     },
 
     shippingInfo: {
@@ -75,8 +75,7 @@ const orderSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: true
-},
+    },
     paymentStatus: {
       type: String,
       default: "payment_pending",

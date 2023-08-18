@@ -8,26 +8,16 @@ const createCart = async function (req, res) {
     let userId = req.user.userId;
     let data = req.body;
     if (isValidBody(data)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "please provide request body" });
-    }
+      return res.status(400) .send({ status: false, message: "please provide request body" }); }
     let { productId } = data;
-    // console.log(data);
     if (!isValidId(productId)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "please provide valid product Id" });
+      return res.status(400) .send({ status: false, message: "please provide valid product Id" });
     }
     let product = await productModel.findById(productId);
     if (!product) {
-      return res
-        .status(400)
-        .send({
-          status: false,
-          message: "this product is not found in product model",
-        });
+      return res.status(400).send({ status: false, message: "this product is not found in product model", });
     }
+
     let userCart = await cartModel.findOne({ userId: userId });
     let cart = {};
     if (!userCart) {
@@ -36,15 +26,11 @@ const createCart = async function (req, res) {
       cart.totalItems = 1;
       cart.totalPrice = product.price;
       const newCart = await cartModel.create(cart);
-      return res.status(201).send({
-        status: false,
-        message: "item added successfully",
-        cart: newCart,
-      });
+      return res.status(201).send({  status: false,  message: "item added successfully",cart: newCart,});
     }
+
     let quantity = 1;
     let arr = userCart.items;
-
     let isExist = false;
     for (let i = 0; i < arr.length; i++) {
       if (arr[i].productId == productId) {
@@ -53,12 +39,11 @@ const createCart = async function (req, res) {
       }
     }
     if (!isExist) {
-      arr.push({ productId: productId, quantity: quantity });
-    }
+      arr.push({ productId: productId, quantity: quantity });}
     cart.items = arr;
     let price = product.price;
     cart.totalPrice = userCart.totalPrice + price * quantity;
-    cart.totalItems = arr.length;
+    cart.totalItems = userCart.totalItems +1;
     let update = await cartModel
       .findByIdAndUpdate(userCart._id, cart, { new: true })
       .populate("items.productId");
@@ -69,6 +54,9 @@ const createCart = async function (req, res) {
     return res.status(500).send({ status: false, error: err.message });
   }
 };
+
+
+
 
 const getCartDetails = async function (req, res) {
   try {
@@ -187,7 +175,7 @@ const updateCart = async (req, res) => {
     let updatedCart = {};
     const cartItem = userCart.items[item];
     if (quantity < 1) {
-      let totalItems = userCart.totalItems - 1;
+      let totalItems = userCart.totalItems - cartItem.quantity;
       let totalPrice = userCart.totalPrice - cartItem.quantity * product.price;
       let cart = await cartModel
         .findByIdAndUpdate(
@@ -204,7 +192,7 @@ const updateCart = async (req, res) => {
         .send({ status: true, message: "cart  updated", cart: cart });
     } else if (quantity < cartItem.quantity) {
       updatedCart.items = userCart.items;
-      updatedCart.totalItems = userCart.totalItems;
+      updatedCart.totalItems = userCart.totalItems - 1;
       updatedCart.totalPrice =
         userCart.totalPrice +
         (quantity * product.price - cartItem.quantity * product.price);

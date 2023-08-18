@@ -121,8 +121,8 @@ const loginUser = async function (req, res) {
     res
       .status(200)
       .send({ success: true, user: userInfo, message:" login seccessfully" ,response, token: token });
-  } catch (err) {
-    return res.status(500).send({ status: false, message: err.message });
+  } catch (error) {
+    return res.status(500).send({ status: false, error: error.message });
   }
 };
 
@@ -148,7 +148,7 @@ const refreshToken = (req, res) => {
       res.status(404).send({message:"Invalid request"});
     }
   } catch (error) {
-    return res.status(500).send({ message: error.message });
+    return res.status(500).send({ error: error.message });
   }
 };
 
@@ -165,7 +165,7 @@ const forgetPassword = async (req, res) => {
     if (userData) {
       const randomString = randomstring.generate();
 
-      const data = await userModel.findOneAndUpdate(
+       await userModel.findOneAndUpdate(
         { email: email },
         {
           $set: {
@@ -189,7 +189,7 @@ const forgetPassword = async (req, res) => {
         .send({ success: false, message: "this mail does not exits" });
     }
   } catch (error) {
-    res.status(400).send({ success: false, message: error.message });
+    res.status(400).send({ success: false, error: error.message });
   }
 };
 
@@ -227,7 +227,7 @@ const updatePassword = async (req, res) => {
       res.status(400).send({ success: false, message: "invalid token " });
     }
   } catch (error) {
-    return res.status(400).send({ success: false, message: error.message });
+    return res.status(400).send({ success: false, error: error.message });
   }
 };
 
@@ -251,7 +251,7 @@ const logout = async (req, res) => {
       .status(200)
       .send({ success: true, message: "Sign out successfully!" });
   } catch (error) {
-    return res.status(500).send({ success: false, message: error.message });
+    return res.status(500).send({ success: false, error: error.message });
   }
 };
 

@@ -9,7 +9,7 @@ const orderModel = require("../model/orderModel");
 const payment = async (req, res, next) => {
   try {
 
-    let cart = req.body.cart
+    let items = req.body.items
     let session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: req.body.items.items.map((item) => ({
@@ -32,17 +32,15 @@ const payment = async (req, res, next) => {
         email: req.body.form.email,
         paymentStatus: "payment_pending",
       });
-        // console.log(" order=>",order);
 
       if (order) {
-        // console.log("line38" , order);
         order.paymentId = session.id;
-        console.log(" payment iddd",order.paymentId);
+    
         await order.save();
       }
     } else {
       let order = await orderModel.findOne({
-        userId: cart.userId,
+        userId: items.userId,
         paymentStatus :"payment_pending"
         // items: req.body.items,
         // status: orderStatus.NEW,
@@ -74,6 +72,7 @@ const paymentStatus =  async (req, res) => {
       paymentIntent = "payment_failed";
     }
     let order = await orderModel.findOne({ paymentId: c_id });
+    // console.log(order);
     if (order) {
       order.paymentStatus = paymentIntent;
       await order.save();

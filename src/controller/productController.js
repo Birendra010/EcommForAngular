@@ -22,9 +22,6 @@ const createProduct = async function (req, res) {
 };
 
 
-
-
-
 const getLimitedProducts = async (req, res) => {
   try {
     let products = await productModel.find().limit(20);
@@ -43,9 +40,6 @@ const getPopularProducts = async (req, res) => {
   }
 };
 
-
-
-
 const getAllproducts = async (req, res) => {
   try {
     let products = await productModel.find()
@@ -54,6 +48,8 @@ const getAllproducts = async (req, res) => {
     return res.status(500).send({ status: false, message: error.message });
   }
 };
+
+
 const getProductById = async (req, res) => {
   try {
     let id = req.params.id;
