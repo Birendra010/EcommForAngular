@@ -21,6 +21,7 @@ router.get("/limited-products", productCotroller.getLimitedProducts);
 router.get("/popular-products", productCotroller.getPopularProducts);
 router.get("/products", productCotroller.getAllproducts);
 router.get("/getProductById/:id", productCotroller.getProductById);
+router.get("/products/search", productCotroller.searchProduct)
 
 //cart route
 router.post("/cart", midd.authentication, cartController.createCart);

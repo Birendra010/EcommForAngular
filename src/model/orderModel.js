@@ -1,4 +1,4 @@
-const { string, required } = require("joi");
+const { string, required, boolean } = require("joi");
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
@@ -18,6 +18,10 @@ const orderSchema = new mongoose.Schema(
         }, //ObjectId, refs to Product model
         quantity: { type: Number, require: true, default: 1 },
         _id: false,
+        canceled: {
+          type: Boolean,
+          default: false,
+        },
       },
     ],
     totalPrice: {

@@ -24,7 +24,7 @@ const createProduct = async function (req, res) {
 
 const getLimitedProducts = async (req, res) => {
   try {
-    let products = await productModel.find().limit(20);
+    let products = await productModel.find().limit(30);
     return res.status(200).send({ status: true, products });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -59,10 +59,39 @@ const getProductById = async (req, res) => {
     return res.status(500).send({ status: false, message: error.message });
   }
 };
+
+
+
+
+
+
+
+
+
+const searchProduct = async (req, res) => {
+  try {
+    const { searchQuery } = req.query;
+   
+    const products = await productModel.find({
+      $or: [
+        { title: { $regex: searchQuery, $options: "i" } },
+        { brand: { $regex: searchQuery, $options: "i" } },
+        { category: { $regex: searchQuery, $options: "i" } },
+      ],
+    });
+    return res.json(products);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
+
+
 module.exports = {
   createProduct,
   getLimitedProducts,
   getProductById,
   getPopularProducts,
-  getAllproducts
+  getAllproducts,
+  searchProduct,
 };
