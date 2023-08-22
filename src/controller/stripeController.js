@@ -2,6 +2,7 @@
 const stripe = require("stripe")("sk_test_51NdRYtSD97XjtBD2OyoG1tyUGQIO1Mt4StlzIjMwINUdD5DSjXO7Q0c3KuTPEcN4BtkvAQevpJgY7ftlSnVGdCdu008pNOAnIs");
 
 const orderModel = require("../model/orderModel");
+const productModel = require("../model/productModel");
 
 
 
@@ -42,8 +43,6 @@ const payment = async (req, res, next) => {
       let order = await orderModel.findOne({
         userId: items.userId,
         paymentStatus :"payment_pending"
-        // items: req.body.items,
-        // status: orderStatus.NEW,
       });
       if (order) {
         order.paymentId = session.id;
@@ -61,7 +60,6 @@ const paymentStatus =  async (req, res) => {
     const c_id = req.body.id;
 
     let session = await stripe.checkout.sessions.retrieve(c_id);
-    // console.log("session", session.payment_status);
     let paymentIntent = "";
     if (session.payment_intent) {
       paymentIntent = await stripe.paymentIntents.retrieve(
@@ -71,9 +69,19 @@ const paymentStatus =  async (req, res) => {
     } else {
       paymentIntent = "payment_failed";
     }
-    let order = await orderModel.findOne({ paymentId: c_id });
-    // console.log(order);
+    let order = await orderModel.findOne({ paymentId: c_id })
+    console.log(order);
     if (order) {
+      // if payment failed then update product stocks
+      if (paymentIntent === "payment_failed") {
+        order.items.forEach(async (item) => {
+          await productModel.findByIdAndUpdate(
+            item.productId._id,
+            { $inc: { stock: +item.quantity } },
+            { new: true }
+          );
+        });
+      }
       order.paymentStatus = paymentIntent;
       await order.save();
     }

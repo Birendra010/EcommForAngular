@@ -3,6 +3,7 @@ const cartModel = require("../model/cartModel");
 const orderModel = require("../model/orderModel");
 const productModel = require("../model/productModel");
 const { orderSchema } = require("../validators/schemaValidation");
+const userModel = require("../model/userModel");
 const ObjectId = mongoose.Types.ObjectId;
 const validObjectId = function (objectId) {
   return mongoose.Types.ObjectId.isValid(objectId);
@@ -13,8 +14,14 @@ const createOrder = async (req, res) => {
     let { userId, items, totalItems, totalPrice } = req.body.order;
     let { bname, name, email, phone, house, city, state, pincode } =
       req.body.form;
-
+//if guest checkout
     if (email.length) {
+       let user = await userModel.findOne({ email });
+       if (user) {
+         return res
+           .status(400)
+           .send({ status: false, message: "You have an account,Please login " });
+       }
       const orderDetails = {
         name: bname,
         email,
@@ -43,7 +50,7 @@ const createOrder = async (req, res) => {
           { new: true }
         );
       });
-
+// console.log(order);
       return res
         .status(201)
         .send({ status: true, message: "Order placed ", order });
@@ -55,32 +62,28 @@ const createOrder = async (req, res) => {
       if (!cartDetail) {
         return res
           .status(404)
-          .send({ status: false, msg: "User cart not found" });
+          .send({ status: false, message: "User cart not found" });
       }
-      if (cartDetail.items.length <= 0) {
+      if (items.length <= 0) {
         return res.status(400).send({
           status: false,
-          msg: "Please add some items in cart to place order",
+          message: "Please add some items in cart to place order",
         });
       }
 
-      // console.log(cartDetail);
-      const filter = cartDetail.items.filter(
-        (x) => x.quantity > x.productId.stock
-      );
+      const filter = items.filter((x) => x.quantity > x.productId.stock);
       if (filter.length > 0) {
-        return res
-          .status(400)
-          .send({
-            status: false,
-            message: "some product are out of stock",
-            filter,
-          });
+        return res.status(400).send({
+          status: false,
+          message: "some product are out of stock",
+          filter,
+          items,
+        });
       }
 
       let order = {
         userId,
-        items: cartDetail.items,
+        items: items,
         totalItems: totalItems,
         totalPrice: totalPrice,
         products: items,
@@ -95,27 +98,27 @@ const createOrder = async (req, res) => {
           },
         },
       };
-      let crearedata = await orderModel.create(order);
-      cartDetail.items.forEach(async (item) => {
+      // create order and update product stocks
+      let createdata = await orderModel.create(order);
+      items.forEach(async (item) => {
         await productModel.findByIdAndUpdate(
           item.productId._id,
           { $inc: { stock: -item.quantity } },
           { new: true }
         );
       });
+      //cart empty after order  successfully placed  
       await cartModel.findByIdAndUpdate(
         cartDetail._id,
         { $set: { items: [], totalItems: 0, totalPrice: 0 } },
         { new: true }
       );
 
-      return res
-        .status(200)
-        .send({
-          status: true,
-          message: "order placed successfully",
-          data: crearedata,
-        });
+      return res.status(200).send({
+        status: true,
+        message: "order placed successfully",
+        data: createdata,
+      });
     }
   } catch (error) {
     return res.status(500).send({ error: error.message });
@@ -157,9 +160,9 @@ const getOrderById = async (req, res) => {
     if (!order) {
       return res
         .status(404)
-        .send({ status: false, msg: "You have not completed any order" });
+        .send({ status: false, message: "You have not completed any order" });
     }
-    return res.status(200).send({ status: true, msg: "Order details", order });
+    return res.status(200).send({ status: true, message: "Order details", order });
   } catch (error) {
     return res.status(500).send({ error: error.message });
   }
@@ -174,30 +177,30 @@ const cancelProductInOrder = async (req, res) => {
     if (!orderId) {
       return res
         .status(400)
-        .send({ status: false, msg: "Please provide orderId" });
+        .send({ status: false, message: "Please provide orderId" });
     }
     if (!ObjectId.isValid(orderId)) {
-      return res.status(400).send({ status: false, msg: "invlid orderId" });
+      return res.status(400).send({ status: false, message: "invlid orderId" });
     }
     if (!productId) {
       return res
         .status(400)
-        .send({ status: false, msg: "Please provide productId" });
+        .send({ status: false, message: "Please provide productId" });
     }
     if (!ObjectId.isValid(productId)) {
-      return res.status(400).send({ status: false, msg: "invlid productId" });
+      return res.status(400).send({ status: false, message: "invlid productId" });
     }
     let userOrder = await orderModel.findById(orderId);
     if (!userOrder) {
       return res
         .status(404)
-        .send({ status: false, msg: "order not found with this id" });
+        .send({ status: false, message: "order not found with this id" });
     }
 
     if (userId.valueOf() != userOrder.userId.valueOf()) {
       return res.status(403).send({
         status: false,
-        msg: "Forbidden you have not access to update this",
+        message: "Forbidden you have not access to update this",
       });
     }
     if (userOrder.status !== "completed") {
@@ -229,35 +232,40 @@ const cancelProductInOrder = async (req, res) => {
         x.canceled = true;
       }
     });
+    // console.log("productId ==>",userOrder.items)
 
     product.stock += quantity;
     await product.save();
     let updatedData = {};
-    (updatedData.products = userOrder.items),
-      (updatedData.totalItems = userOrder.items.totalItems - quantity),
-      (updatedData.totalPrice =
-        userOrder.items.totalPrice - product.price * quantity);
-
+    updatedData.items = userOrder.items,
+      updatedData.totalItems = userOrder.totalItems - quantity,
+      updatedData.totalPrice =
+        userOrder.totalPrice - product.price * quantity;
+// console.log(updatedData);
     if (updatedData.totalPrice === 0) {
-      let order = await orderModel.findByIdAndDelete(
+    let order = await orderModel
+      .findByIdAndUpdate(
         orderId,
         {
           $set: {
-            orderDetails: updatedData,
-            status: "canceled",
-            canceledOn: new Date().toLocaleString(),
+            items: updatedData.items,
+            totalItems: updatedData.totalItems,
+            totalPrice: updatedData.totalPrice,
+            status:"canceled"
           },
         },
         { new: true }
-      );
+      )
+      .populate("items.productId");
       return res
         .status(200)
         .send({ status: true, message: "order updated", order });
     } else {
+      console.log(updatedData);
       let order = await orderModel
         .findByIdAndUpdate(
           orderId,
-          { $set: { orderDetails: updatedData } },
+          { $set: {items:updatedData.items,totalItems:updatedData.totalItems,totalPrice:updatedData.totalPrice} },
           { new: true }
         )
         .populate("items.productId");
@@ -279,7 +287,7 @@ const cancelOrder = async (req, res) => {
     if (!orderId) {
       return res
         .status(400)
-        .send({ status: false, msg: "Please provide orderId" });
+        .send({ status: false, message: "Please provide orderId" });
     }
     if (!ObjectId.isValid(orderId)) {
       return res.status(400).send({ status: false, message: "invlid orderId" });
@@ -308,7 +316,7 @@ const cancelOrder = async (req, res) => {
       orderId,
       { $set: { status: "canceled", canceledOn: new Date().toLocaleString() } },
       { new: true },
-      { new: true }
+      // { new: true }
     );
     return res
       .status(200)
@@ -334,7 +342,7 @@ const trackOrderById = async (req, res) => {
     if (!order || !order.email) {
       return res
         .status(400)
-        .send({ status: false, msg: "You have not completed any order" });
+        .send({ status: false, message: "You have not completed any order" });
     }
     return res
       .status(200)
