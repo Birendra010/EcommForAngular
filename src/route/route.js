@@ -6,6 +6,7 @@ const cartController = require("../controller/cartController");
 const orderController = require("../controller/orderController");
 const midd = require("../middleware/auth");
 const stripeController = require("../controller/stripeController")
+const wishlistController = require("../controller/wishlistController")
 
 //user route
 router.post("/signup", userController.signUp);
@@ -37,6 +38,16 @@ router.get("/track/:orderId", orderController.trackOrderById);
 router.get("/order/:orderId" , midd.authentication,orderController.getOrderById)
 router.put("/order/:orderId", midd.authentication, orderController.cancelProductInOrder);
 router.put("/order/cancel/:orderId", midd.authentication, orderController.cancelOrder);
+
+
+
+
+///wishlist 
+router.post("/wishlist", midd.authentication, wishlistController.addToWishlist)
+router.get("/wishlist", midd.authentication, wishlistController.getWishlist);
+
+
+
 
 
 //payment 

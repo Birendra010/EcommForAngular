@@ -6,9 +6,9 @@ const userSchema = mongoose.Schema({
         required: true,
         trim:true
     },
-    mobile: {
+    phone: {
         type: String,
-        required: true,
+        // required: true,
         
     },
     email: {

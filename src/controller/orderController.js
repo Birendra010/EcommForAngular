@@ -2,7 +2,8 @@ const { default: mongoose } = require("mongoose");
 const cartModel = require("../model/cartModel");
 const orderModel = require("../model/orderModel");
 const productModel = require("../model/productModel");
-const { orderSchema } = require("../validators/schemaValidation");
+const bcrypt = require("bcrypt");
+// const { orderSchema } = require("../validators/schemaValidation");
 const userModel = require("../model/userModel");
 const ObjectId = mongoose.Types.ObjectId;
 const validObjectId = function (objectId) {
@@ -12,7 +13,7 @@ const validObjectId = function (objectId) {
 const createOrder = async (req, res) => {
   try {
     let { userId, items, totalItems, totalPrice } = req.body.order;
-    let { bname, name, email, phone, house, city, state, pincode } =
+    let { bname, email,password,name, phone, house, city, state, pincode } =
       req.body.form;
 //if guest checkout
     if (email.length) {
@@ -25,14 +26,15 @@ const createOrder = async (req, res) => {
       const orderDetails = {
         name: bname,
         email,
+        password,
         items,
         totalItems: totalItems,
         totalPrice: totalPrice,
         products: items,
 
         shippingInfo: {
-          name: name,
-          phone: phone,
+          name ,
+          phone ,
           address: {
             house: house,
             city: city,
@@ -41,6 +43,12 @@ const createOrder = async (req, res) => {
           },
         },
       };
+
+      let hash = await bcrypt.hash(password, 10);
+
+      let newUser = await userModel.create({name:bname , email:email, password:hash})
+      orderDetails.userId = newUser._id
+
 
       let order = await orderModel.create(orderDetails);
       items.forEach(async (item) => {

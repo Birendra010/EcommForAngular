@@ -1,4 +1,4 @@
-const { string, required, boolean } = require("joi");
+// const { string, required, boolean } = require("joi");
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
@@ -46,7 +46,7 @@ const orderSchema = new mongoose.Schema(
     shippingInfo: {
       name: {
         type: String,
-        required: true,
+        // required: true,
         trim: true,
       },
       phone: {
