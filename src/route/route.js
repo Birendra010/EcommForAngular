@@ -45,6 +45,7 @@ router.put("/order/cancel/:orderId", midd.authentication, orderController.cancel
 ///wishlist 
 router.post("/wishlist", midd.authentication, wishlistController.addToWishlist)
 router.get("/wishlist", midd.authentication, wishlistController.getWishlist);
+router.put("/wishlist", midd.authentication, wishlistController.removeFromWishlist);
 
 
 

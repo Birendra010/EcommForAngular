@@ -95,7 +95,7 @@ const addToCartFromLocalStorage = async (req, res) => {
       let newCart = await cartModel.create(cartDetails);
       return res
         .status(201)
-        .send({ status: true, msg: "Items added to cart", cart: newCart });
+        .send({ status: true, message: "Items added to cart", cart: newCart });
     } else {
       let totalItems = 0;
       let totalPrice = 0;
