@@ -52,8 +52,6 @@ const signUp = async (req, res) => {
 
 
 
-
-
 ///login user
 let UserIdToLocal
 const getUserId = ( ) => {
@@ -206,7 +204,7 @@ const updatePassword = async (req, res) => {
     if (tokenData.tokenExp < Date.now()) {
       return res
         .status(400)
-        .send({ success: false, message: "this token has been expired" });
+        .send({ success: false, message: "this link has been expired ! Please try again" });
     }
     if (tokenData) {
       const password = req.body.newPassword;

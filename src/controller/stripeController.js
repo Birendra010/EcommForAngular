@@ -1,6 +1,6 @@
 
 const stripe = require("stripe")("sk_test_51NdRYtSD97XjtBD2OyoG1tyUGQIO1Mt4StlzIjMwINUdD5DSjXO7Q0c3KuTPEcN4BtkvAQevpJgY7ftlSnVGdCdu008pNOAnIs");
-
+const mailTrackId = require("../validators/sendOrderSummaryMail")
 const orderModel = require("../model/orderModel");
 const productModel = require("../model/productModel");
 
@@ -32,7 +32,7 @@ const payment = async (req, res, next) => {
       let order = await orderModel.findOne({
         email: req.body.form.email,
         paymentStatus: "payment_pending",
-      });
+      })
 
       if (order) {
         order.paymentId = session.id;
@@ -69,8 +69,8 @@ const paymentStatus =  async (req, res) => {
     } else {
       paymentIntent = "payment_failed";
     }
-    let order = await orderModel.findOne({ paymentId: c_id })
-    console.log(order);
+    let order = await orderModel.findOne({ paymentId: c_id }).populate(["items.productId","userId"])
+    // console.log(order);
     if (order) {
       // if payment failed then update product stocks
       if (paymentIntent === "payment_failed") {
@@ -81,12 +81,16 @@ const paymentStatus =  async (req, res) => {
             { new: true }
           );
         });
+      } else {
+        items = order;
+        await mailTrackId(order.userId.email , order)
       }
       order.paymentStatus = paymentIntent;
       await order.save();
     }
 
-    res.status(200).json({paymentIntent : paymentIntent , orderId : order._id});
+ return res.status(200).json({paymentIntent : paymentIntent , orderId : order._id});
+  //  console.log("respo",respo)
   } catch (error) {
     console.log(error);
   }

@@ -34,8 +34,8 @@ router.put( "/local-cart", midd.authentication, cartController.addToCartFromLoca
 //order route
 router.post("/order",  orderController.createOrder);
 router.get("/order", midd.authentication, orderController.getOrder);
+router.get("/order/:orderId" ,orderController.getOrderById)
 router.get("/track/:orderId", orderController.trackOrderById);
-router.get("/order/:orderId" , midd.authentication,orderController.getOrderById)
 router.put("/order/:orderId", midd.authentication, orderController.cancelProductInOrder);
 router.put("/order/cancel/:orderId", midd.authentication, orderController.cancelOrder);
 

@@ -157,12 +157,12 @@ const getOrder = async function (req, res) {
 ///get order by orderId
 const getOrderById = async (req, res) => {
   try {
-    let userId = req.user.userId;
+    // let userId = req.user.userId;
     let orderId = req.params.orderId;
     let order = await orderModel
       .findOne({
         _id: orderId,
-        userId
+     
       })
       .populate("items.productId");
     if (!order) {
@@ -347,7 +347,7 @@ const trackOrderById = async (req, res) => {
       .findOne({ _id: orderId })
       .populate("items.productId");
     //  if order not found with orderId or order doesn't have email in it.
-    if (!order || !order.email) {
+    if (!order) {
       return res
         .status(400)
         .send({ status: false, message: "You have not completed any order" });
