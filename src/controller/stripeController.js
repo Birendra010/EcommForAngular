@@ -25,7 +25,7 @@ const payment = async (req, res, next) => {
         quantity: item.quantity,
       })),
       mode: "payment",
-      success_url: "http://192.168.1.64:4200/success",
+      success_url: `${process.env.HOST_URL}/success`,
       cancel_url: `${process.env.HOST_URL}/failed`,
     });
     if (req.body.form.email) {
