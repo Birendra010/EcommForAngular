@@ -304,7 +304,7 @@ const cancelOrder = async (req, res) => {
     }
     let userOrder = await orderModel
       .findById(orderId)
-      .populate("items.productId");;
+      .populate("items.productId");
 
     if (userId.valueOf() != userOrder.userId.valueOf()) {
       return res.status(403).send({
@@ -329,7 +329,7 @@ const cancelOrder = async (req, res) => {
       { $set: { status: "canceled", canceledOn: new Date().toLocaleString() } },
       { new: true },
       // { new: true }
-    );
+    ).populate("items.productId");
     return res
       .status(200)
       .send({ status: true, message: "order cancled", order })
