@@ -216,7 +216,9 @@ const cancelProductInOrder = async (req, res) => {
         .status(400)
         .send({ status: false, message: "Order cannot be updated" });
     }
-    let product = await productModel.findById(productId);
+    let product = await productModel
+      .findById(productId)
+      .populate("items.productId");;
     if (!product) {
       return res
         .status(404)
@@ -300,7 +302,9 @@ const cancelOrder = async (req, res) => {
     if (!ObjectId.isValid(orderId)) {
       return res.status(400).send({ status: false, message: "invlid orderId" });
     }
-    let userOrder = await orderModel.findById(orderId);
+    let userOrder = await orderModel
+      .findById(orderId)
+      .populate("items.productId");;
 
     if (userId.valueOf() != userOrder.userId.valueOf()) {
       return res.status(403).send({
@@ -328,7 +332,7 @@ const cancelOrder = async (req, res) => {
     );
     return res
       .status(200)
-      .send({ status: true, message: "order cancled", order });
+      .send({ status: true, message: "order cancled", order })
   } catch (error) {
     return res.status(500).send({ error: error.message });
   }
