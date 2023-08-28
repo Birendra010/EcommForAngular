@@ -218,7 +218,7 @@ const cancelProductInOrder = async (req, res) => {
     }
     let product = await productModel
       .findById(productId)
-      .populate("items.productId");;
+     
     if (!product) {
       return res
         .status(404)
@@ -271,7 +271,7 @@ const cancelProductInOrder = async (req, res) => {
         .status(200)
         .send({ status: true, message: "order updated", order });
     } else {
-      console.log(updatedData);
+      // console.log(updatedData);
       let order = await orderModel
         .findByIdAndUpdate(
           orderId,
