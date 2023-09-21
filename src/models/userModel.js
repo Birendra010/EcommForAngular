@@ -6,7 +6,7 @@ const userSchema = mongoose.Schema({
         required: true,
         trim:true
     },
-    phone: {
+    mobile: {
         type: String,
         // required: true,
         

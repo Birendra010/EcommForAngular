@@ -1,10 +1,10 @@
 const { default: mongoose } = require("mongoose");
-const cartModel = require("../model/cartModel");
-const orderModel = require("../model/orderModel");
-const productModel = require("../model/productModel");
+const cartModel = require("../models/cartModel");
+const orderModel = require("../models/orderModel");
+const productModel = require("../models/productModel");
 const bcrypt = require("bcrypt");
 // const { orderSchema } = require("../validators/schemaValidation");
-const userModel = require("../model/userModel");
+const userModel = require("../models/userModel");
 const ObjectId = mongoose.Types.ObjectId;
 const validObjectId = function (objectId) {
   return mongoose.Types.ObjectId.isValid(objectId);
@@ -13,16 +13,19 @@ const validObjectId = function (objectId) {
 const createOrder = async (req, res) => {
   try {
     let { userId, items, totalItems, totalPrice } = req.body.order;
-    let { bname, email,password,name, phone, house, city, state, pincode } =
+    let { bname, email, password, name, phone, house, city, state, pincode } =
       req.body.form;
-//if guest checkout
+    //if guest checkout
     if (email.length) {
-       let user = await userModel.findOne({ email });
-       if (user) {
-         return res
-           .status(400)
-           .send({ status: false, message: "You have an account,Please login " });
-       }
+      let user = await userModel.findOne({ email });
+      if (user) {
+        return res
+          .status(400)
+          .send({
+            status: false,
+            message: "You have an account,Please login ",
+          });
+      }
       const orderDetails = {
         name: bname,
         email,
@@ -33,8 +36,8 @@ const createOrder = async (req, res) => {
         products: items,
 
         shippingInfo: {
-          name ,
-          phone ,
+          name,
+          phone,
           address: {
             house: house,
             city: city,
@@ -46,9 +49,12 @@ const createOrder = async (req, res) => {
 
       let hash = await bcrypt.hash(password, 10);
 
-      let newUser = await userModel.create({name:bname , email:email, password:hash})
-      orderDetails.userId = newUser._id
-
+      let newUser = await userModel.create({
+        name: bname,
+        email: email,
+        password: hash,
+      });
+      orderDetails.userId = newUser._id;
 
       let order = await orderModel.create(orderDetails);
       items.forEach(async (item) => {
@@ -58,7 +64,7 @@ const createOrder = async (req, res) => {
           { new: true }
         );
       });
-// console.log(order);
+      // console.log(order);
       return res
         .status(201)
         .send({ status: true, message: "Order placed ", order });
@@ -115,7 +121,7 @@ const createOrder = async (req, res) => {
           { new: true }
         );
       });
-      //cart empty after order  successfully placed  
+      //cart empty after order  successfully placed
       await cartModel.findByIdAndUpdate(
         cartDetail._id,
         { $set: { items: [], totalItems: 0, totalPrice: 0 } },
@@ -162,7 +168,6 @@ const getOrderById = async (req, res) => {
     let order = await orderModel
       .findOne({
         _id: orderId,
-     
       })
       .populate("items.productId");
     if (!order) {
@@ -170,7 +175,9 @@ const getOrderById = async (req, res) => {
         .status(404)
         .send({ status: false, message: "You have not completed any order" });
     }
-    return res.status(200).send({ status: true, message: "Order details", order });
+    return res
+      .status(200)
+      .send({ status: true, message: "Order details", order });
   } catch (error) {
     return res.status(500).send({ error: error.message });
   }
@@ -196,7 +203,9 @@ const cancelProductInOrder = async (req, res) => {
         .send({ status: false, message: "Please provide productId" });
     }
     if (!ObjectId.isValid(productId)) {
-      return res.status(400).send({ status: false, message: "invlid productId" });
+      return res
+        .status(400)
+        .send({ status: false, message: "invlid productId" });
     }
     let userOrder = await orderModel.findById(orderId);
     if (!userOrder) {
@@ -216,9 +225,8 @@ const cancelProductInOrder = async (req, res) => {
         .status(400)
         .send({ status: false, message: "Order cannot be updated" });
     }
-    let product = await productModel
-      .findById(productId)
-     
+    let product = await productModel.findById(productId);
+
     if (!product) {
       return res
         .status(404)
@@ -247,26 +255,26 @@ const cancelProductInOrder = async (req, res) => {
     product.stock += quantity;
     await product.save();
     let updatedData = {};
-    updatedData.items = userOrder.items,
-      updatedData.totalItems = userOrder.totalItems - quantity,
-      updatedData.totalPrice =
-        userOrder.totalPrice - product.price * quantity;
-// console.log(updatedData);
+    (updatedData.items = userOrder.items),
+      (updatedData.totalItems = userOrder.totalItems - quantity),
+      (updatedData.totalPrice =
+        userOrder.totalPrice - product.price * quantity);
+    // console.log(updatedData);
     if (updatedData.totalPrice === 0) {
-    let order = await orderModel
-      .findByIdAndUpdate(
-        orderId,
-        {
-          $set: {
-            items: updatedData.items,
-            totalItems: updatedData.totalItems,
-            totalPrice: updatedData.totalPrice,
-            status:"canceled"
+      let order = await orderModel
+        .findByIdAndUpdate(
+          orderId,
+          {
+            $set: {
+              items: updatedData.items,
+              totalItems: updatedData.totalItems,
+              totalPrice: updatedData.totalPrice,
+              status: "canceled",
+            },
           },
-        },
-        { new: true }
-      )
-      .populate("items.productId");
+          { new: true }
+        )
+        .populate("items.productId");
       return res
         .status(200)
         .send({ status: true, message: "order updated", order });
@@ -275,7 +283,13 @@ const cancelProductInOrder = async (req, res) => {
       let order = await orderModel
         .findByIdAndUpdate(
           orderId,
-          { $set: {items:updatedData.items,totalItems:updatedData.totalItems,totalPrice:updatedData.totalPrice} },
+          {
+            $set: {
+              items: updatedData.items,
+              totalItems: updatedData.totalItems,
+              totalPrice: updatedData.totalPrice,
+            },
+          },
           { new: true }
         )
         .populate("items.productId");
@@ -324,15 +338,19 @@ const cancelOrder = async (req, res) => {
         { new: true }
       );
     });
-    const order = await orderModel.findByIdAndUpdate(
-      orderId,
-      { $set: { status: "canceled", canceledOn: new Date().toLocaleString() } },
-      { new: true },
-      // { new: true }
-    ).populate("items.productId");
+    const order = await orderModel
+      .findByIdAndUpdate(
+        orderId,
+        {
+          $set: { status: "canceled", canceledOn: new Date().toLocaleString() },
+        },
+        { new: true }
+        // { new: true }
+      )
+      .populate("items.productId");
     return res
       .status(200)
-      .send({ status: true, message: "order cancled", order })
+      .send({ status: true, message: "order cancled", order });
   } catch (error) {
     return res.status(500).send({ error: error.message });
   }

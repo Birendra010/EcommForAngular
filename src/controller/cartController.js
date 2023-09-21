@@ -1,5 +1,5 @@
-const productModel = require("../model/productModel");
-const cartModel = require("../model/cartModel");
+const productModel = require("../models/productModel");
+const cartModel = require("../models/cartModel");
 const { isValidBody, isValidId } = require("../validators/validator");
 const { getUserId } = require("./userController.js");
 
@@ -8,14 +8,24 @@ const createCart = async function (req, res) {
     let userId = req.user.userId;
     let data = req.body;
     if (isValidBody(data)) {
-      return res.status(400) .send({ status: false, message: "please provide request body" }); }
+      return res
+        .status(400)
+        .send({ status: false, message: "please provide request body" });
+    }
     let { productId } = data;
     if (!isValidId(productId)) {
-      return res.status(400) .send({ status: false, message: "please provide valid product Id" });
+      return res
+        .status(400)
+        .send({ status: false, message: "please provide valid product Id" });
     }
     let product = await productModel.findById(productId);
     if (!product) {
-      return res.status(400).send({ status: false, message: "this product is not found in product model", });
+      return res
+        .status(400)
+        .send({
+          status: false,
+          message: "this product is not found in product model",
+        });
     }
 
     let userCart = await cartModel.findOne({ userId: userId });
@@ -26,7 +36,13 @@ const createCart = async function (req, res) {
       cart.totalItems = 1;
       cart.totalPrice = product.price;
       const newCart = await cartModel.create(cart);
-      return res.status(201).send({  status: false,  message: "item added successfully",cart: newCart,});
+      return res
+        .status(201)
+        .send({
+          status: false,
+          message: "item added successfully",
+          cart: newCart,
+        });
     }
 
     let quantity = 1;
@@ -39,11 +55,12 @@ const createCart = async function (req, res) {
       }
     }
     if (!isExist) {
-      arr.push({ productId: productId, quantity: quantity });}
+      arr.push({ productId: productId, quantity: quantity });
+    }
     cart.items = arr;
     let price = product.price;
     cart.totalPrice = userCart.totalPrice + price * quantity;
-    cart.totalItems = userCart.totalItems +1;
+    cart.totalItems = userCart.totalItems + 1;
     let update = await cartModel
       .findByIdAndUpdate(userCart._id, cart, { new: true })
       .populate("items.productId");
@@ -54,9 +71,6 @@ const createCart = async function (req, res) {
     return res.status(500).send({ status: false, error: err.message });
   }
 };
-
-
-
 
 const getCartDetails = async function (req, res) {
   try {

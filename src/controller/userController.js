@@ -1,13 +1,9 @@
-const userModel = require("../model/userModel");
+const userModel = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { authSchema } = require("../validators/schemaValidation");
 const randomstring = require("randomstring");
 const { sendResetPasswordMail } = require("../validators/sendMail");
-
-
-
-
 
 //register user
 const signUp = async (req, res) => {
@@ -15,7 +11,9 @@ const signUp = async (req, res) => {
     let { email, password, name, mobile } = req.body;
 
     if (Object.keys(req.body).length == 0 || Object.keys(req.body).length > 4) {
-      return res.status(400).send({ status: false, message: "invalid request" });
+      return res
+        .status(422)
+        .send({ status: false, message: "invalid request" });
     }
     const valid = authSchema.validate(req.body);
 
@@ -46,33 +44,33 @@ const signUp = async (req, res) => {
       token: token,
     });
   } catch (err) {
-    res.status(500).send({ status: false, message: err.message });
+    console.log(err)
+   return res.status(500).send({ status: false, message: err.message });
   }
 };
 
-
-
 ///login user
-let UserIdToLocal
-const getUserId = ( ) => {
-  return UserIdToLocal
-}
+let UserIdToLocal;
+const getUserId = () => {
+  return UserIdToLocal;
+};
 const loginUser = async function (req, res) {
-
   try {
     const email = req.body.email;
     const Password = req.body.password;
 
     if (Object.keys(req.body).length == 0 || Object.keys(req.body).length > 2) {
-      return res.status(400).send({ status: false, message: "invalid request" });
+      return res
+        .status(422)
+        .send({ status: false, message: "invalid request" });
     }
 
-    if (!email) {
-      return res.status(400).send({ message: "email is not present" });
+    if (!email || !Password) {
+      return res.status(400).send({ message: "email or Password are not present" });
     }
-    if (!Password) {
-      return res.status(400).send({ message: "Password is not present" });
-    }
+    // if (!Password) {
+    //   return res.status(400).send({ message: "Password is not present" });
+    // }
     let user = await userModel.findOne({ email: email });
     if (!user) {
       return res
@@ -115,10 +113,14 @@ const loginUser = async function (req, res) {
     const userInfo = {
       email: user.email,
     };
-    UserIdToLocal=user._id
-    res
-      .status(200)
-      .send({ success: true, user: userInfo, message:" login seccessfully" ,response, token: token });
+    UserIdToLocal = user._id;
+    res.status(200).send({
+      success: true,
+      user: userInfo,
+      message: " login seccessfully",
+      response,
+      token: token,
+    });
   } catch (error) {
     return res.status(500).send({ status: false, error: error.message });
   }
@@ -143,7 +145,7 @@ const refreshToken = (req, res) => {
       };
       res.status(200).json(response);
     } else {
-      res.status(404).send({message:"Invalid request"});
+      res.status(404).send({ message: "Invalid request" });
     }
   } catch (error) {
     return res.status(500).send({ error: error.message });
@@ -163,7 +165,7 @@ const forgetPassword = async (req, res) => {
     if (userData) {
       const randomString = randomstring.generate();
 
-       await userModel.findOneAndUpdate(
+      await userModel.findOneAndUpdate(
         { email: email },
         {
           $set: {
@@ -175,12 +177,10 @@ const forgetPassword = async (req, res) => {
       );
       sendResetPasswordMail(userData.email, randomString);
 
-      res
-        .status(200)
-        .send({
-          success: true,
-          message: "please check your inbox of mail and reset your password ",
-        });
+      res.status(200).send({
+        success: true,
+        message: "please check your inbox of mail and reset your password ",
+      });
     } else {
       res
         .status(400)
@@ -202,9 +202,10 @@ const updatePassword = async (req, res) => {
         .send({ success: false, message: "token expired or empty" });
     }
     if (tokenData.tokenExp < Date.now()) {
-      return res
-        .status(400)
-        .send({ success: false, message: "this link has been expired ! Please try again" });
+      return res.status(400).send({
+        success: false,
+        message: "this link has been expired ! Please try again",
+      });
     }
     if (tokenData) {
       const password = req.body.newPassword;
@@ -214,13 +215,11 @@ const updatePassword = async (req, res) => {
         { $set: { password: newPassword, token: "" } },
         { new: true }
       );
-      return res
-        .status(200)
-        .send({
-          success: true,
-          message: "User password has been reset",
-          data: userData,
-        });
+      return res.status(200).send({
+        success: true,
+        message: "User password has been reset",
+        data: userData,
+      });
     } else {
       res.status(400).send({ success: false, message: "invalid token " });
     }
