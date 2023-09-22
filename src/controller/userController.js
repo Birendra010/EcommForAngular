@@ -24,7 +24,7 @@ const signUp = async (req, res) => {
     if (checkEmail)
       return res
         .status(409)
-        .send({ status: false, message: "Email already exist" });
+        .send({ status: false, message:"Email already exist" });
 
     let hash = await bcrypt.hash(req.body.password, 10);
     const user = {
@@ -37,6 +37,7 @@ const signUp = async (req, res) => {
     let token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRE,
     });
+    // console.log(token)
     return res.cookie("x-api-key", token).status(201).send({
       status: true,
       message: " signup seccessfully",
@@ -44,8 +45,8 @@ const signUp = async (req, res) => {
       token: token,
     });
   } catch (err) {
-    console.log(err)
-   return res.status(500).send({ status: false, message: err.message });
+    // console.log(err);
+    return res.status(500).send({ status: false, message: err.message });
   }
 };
 
@@ -66,7 +67,9 @@ const loginUser = async function (req, res) {
     }
 
     if (!email || !Password) {
-      return res.status(400).send({ message: "email or Password are not present" });
+      return res
+        .status(400)
+        .send({ message: "email or Password are not present" });
     }
     // if (!Password) {
     //   return res.status(400).send({ message: "Password is not present" });
@@ -75,13 +78,13 @@ const loginUser = async function (req, res) {
     if (!user) {
       return res
         .status(409)
-        .send({ status: false, message: "email or Password are not corerct" });
+        .send({ status: false, message: "email is not corerct" });
     }
     let hashPassword = await bcrypt.compare(Password, user.password);
     if (!hashPassword) {
       return res
         .status(409)
-        .send({ message: "email or Password are not corerct" });
+        .send({ status:false, message:"Password is not corerct" });
     }
     let token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRE,
@@ -115,7 +118,7 @@ const loginUser = async function (req, res) {
     };
     UserIdToLocal = user._id;
     res.status(200).send({
-      success: true,
+      status: true,
       user: userInfo,
       message: " login seccessfully",
       response,
@@ -148,7 +151,7 @@ const refreshToken = (req, res) => {
       res.status(404).send({ message: "Invalid request" });
     }
   } catch (error) {
-    return res.status(500).send({ error: error.message });
+    return res.status(500).send({ status:false, error: error.message });
   }
 };
 
@@ -156,38 +159,43 @@ const refreshToken = (req, res) => {
 const forgetPassword = async (req, res) => {
   try {
     const email = req.body.email;
-    const userData = await userModel.findOne({ email });
+    const emailToken = req.body.emailToken
+
+    if (!email) {
+      return res.status(400).send({status:false,message:"please enter your register email!"})
+    }
+    const userData = await userModel.findOne({ email:email });
     if (!userData) {
       return res
         .status(404)
-        .send({ success: false, message: " email not found" });
+        .send({ status: false, message: " email not found" });
     }
     if (userData) {
-      const randomString = randomstring.generate();
+      // const randomString = randomstring.generate();
 
       await userModel.findOneAndUpdate(
         { email: email },
         {
           $set: {
-            token: randomString,
+            token: emailToken,
             tokenExp: Math.round(new Date(Date.now() + 2 * 60 * 1000)),
           },
           new: true,
         }
       );
-      sendResetPasswordMail(userData.email, randomString);
+      sendResetPasswordMail(userData.email, emailToken);
 
       res.status(200).send({
-        success: true,
+        status: true,
         message: "please check your inbox of mail and reset your password ",
       });
     } else {
       res
         .status(400)
-        .send({ success: false, message: "this mail does not exits" });
+        .send({ status: false, message: "this mail does not exits" });
     }
   } catch (error) {
-    res.status(400).send({ success: false, error: error.message });
+    res.status(400).send({ status: false, error: error.message });
   }
 };
 
@@ -195,36 +203,44 @@ const forgetPassword = async (req, res) => {
 const updatePassword = async (req, res) => {
   try {
     const token = req.params.emailToken;
+    // console.log("token",token)
     const tokenData = await userModel.findOne({ token: token });
+    // console.log("tokendata" , tokenData)
     if (!tokenData) {
       return res
         .status(400)
-        .send({ success: false, message: "token expired or empty" });
+        .send({ status: false, message: "token expired or empty" });
     }
+
     if (tokenData.tokenExp < Date.now()) {
       return res.status(400).send({
-        success: false,
+        status: false,
         message: "this link has been expired ! Please try again",
       });
     }
-    if (tokenData) {
-      const password = req.body.newPassword;
-      const newPassword = await bcrypt.hash(password, 10);
-      const userData = await userModel.findByIdAndUpdate(
-        { _id: tokenData._id },
-        { $set: { password: newPassword, token: "" } },
-        { new: true }
-      );
-      return res.status(200).send({
-        success: true,
-        message: "User password has been reset",
-        data: userData,
-      });
-    } else {
-      res.status(400).send({ success: false, message: "invalid token " });
-    }
+    // if (tokenData) {
+    const password = req.body.newPassword;
+    if (!password) {
+      return res.status(400).send({
+    status:false,message:"password field is required"
+  })
+}
+    const newPassword = await bcrypt.hash(password, 10);
+    const userData = await userModel.findByIdAndUpdate(
+      { _id: tokenData._id },
+      { $set: { password: newPassword, token: "" } },
+      { new: true }
+    );
+    return res.status(200).send({
+      status: true,
+      message: "User password has been reset",
+      data: userData,
+    });
+    // } else {
+    //   res.status(400).send({ success: false, message: "invalid token " });
+    // }
   } catch (error) {
-    return res.status(400).send({ success: false, error: error.message });
+    return res.status(500).send({ status: false, error: error.message });
   }
 };
 
@@ -243,12 +259,11 @@ const logout = async (req, res) => {
       { tokens: newTokens },
       { new: true }
     );
-
     return res
       .status(200)
-      .send({ success: true, message: "Sign out successfully!" });
+      .send({ status: true, message: "logout successfully!" });
   } catch (error) {
-    return res.status(500).send({ success: false, error: error.message });
+    return res.status(500).send({ status: false, error: error.message });
   }
 };
 

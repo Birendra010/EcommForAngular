@@ -18,7 +18,8 @@ mongoose
     }
   )
 
-  .then(() => console.log("MongoDb is connected"))
+// .then(() =>
+// console.log("MongoDb is connected"))
   .catch((err) => console.log(err));
 
 const server = app.listen(5000, () => {

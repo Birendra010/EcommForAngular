@@ -11,8 +11,8 @@ const wishlistController = require("../controller/wishlistController")
 //user route
 router.post("/signup", userController.signUp);
 router.post("/login", userController.loginUser);
-router.post("/forgotPassword", userController.forgetPassword);
-router.put("/resetPassword/:emailToken", userController.updatePassword);
+router.post("/forgot-password", userController.forgetPassword);
+router.put("/reset-password/:emailToken", userController.updatePassword);
 router.get("/logout", midd.authentication, userController.logout);
 router.post("/refresh-token", userController.refreshToken);
 

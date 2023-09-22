@@ -7,6 +7,7 @@ const createCart = async function (req, res) {
   try {
     let userId = req.user.userId;
     let data = req.body;
+    console.log("data",data)
     if (isValidBody(data)) {
       return res
         .status(400)
