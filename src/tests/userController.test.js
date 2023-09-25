@@ -1,15 +1,13 @@
 const request = require("supertest");
 const randomstring = require("randomstring");
 const server = require("../index");
-// const {  response } = require("express");
-// let server;
+let token;
 let data;
 let user;
 const emailToken = randomstring.generate();
 
 beforeEach(async () => {
   await server.close();
-  // server = require("../index");
   data = {
     name: "birendra",
     email: "birendra@gmail.com",
@@ -23,6 +21,7 @@ afterEach(async () => {
 
 describe("User signup ", () => {
   //register/signup  user
+  //if user enter  invaild input
   it("should return 422 if Unprocessable Entity", async () => {
     user = await request(server)
       .post("/signup")
@@ -35,7 +34,7 @@ describe("User signup ", () => {
       })
       .expect(422);
   });
-
+// joi validation like password length , name ....
   it("should return 400 if inputs are invalid by joi ", async () => {
     user = await request(server)
       .post("/signup")
@@ -47,7 +46,7 @@ describe("User signup ", () => {
       })
       .expect(400);
   });
-
+//  if dublicate email 
   it("should return 409 if Email already exist ", async () => {
     const response = await request(server).post("/signup").send({
       name: "biendra",
@@ -63,6 +62,7 @@ describe("User signup ", () => {
       })
     );
   });
+  ///*****if user register successfully */
   // it("should return 201 if User is register successfully ",async () => {
   //   const response =await request(server).post("/signup").send({
   //     name: "biendra",
@@ -75,6 +75,7 @@ describe("User signup ", () => {
 });
 
 //login
+// invalid input field request
 describe("User login", () => {
   it("should return 422 if Unprocessable Entity", async () => {
     const response = await request(server).post("/login").send({
@@ -84,7 +85,7 @@ describe("User login", () => {
     });
     expect(response.status).toBe(422);
   });
-
+  // invalid email and password
   it("should return 400 if email or password are not present", async () => {
     const response = await request(server).post("/login").send({
       password: "12345",
@@ -93,7 +94,7 @@ describe("User login", () => {
     });
     expect(response.status).toBe(400);
   });
-
+  // if email is not correct
   it("should return 409 if email is not correct", async () => {
     const response = await request(server).post("/login").send({
       password: "12345",
@@ -107,6 +108,7 @@ describe("User login", () => {
       })
     );
   });
+  // if password is not correct
 
   it("should return 409 if password is not correct", async () => {
     const response = await request(server).post("/login").send({
@@ -121,13 +123,15 @@ describe("User login", () => {
       })
     );
   });
-
+// user login successfully
   it("should return 200 if user inter Valid credentials or login seccessfully  ", async () => {
     const response = await request(server).post("/login").send({
       password: "123456",
       email: "invailidemail@gmail.com",
     });
+
     expect(response.status).toBe(200);
+    token = response.body.token;
   });
 });
 
@@ -182,16 +186,16 @@ describe("update password ", () => {
 });
 
 //logout
-
+// 
 describe("logout", () => {
   it("should return 401 if token is not present in header", async () => {
     const response = await request(server).get("/logout").send({}).set({});
     expect(response.status).toBe(401);
   });
-
+// logout seccessfully
   it("should return 200 if logout successfully", async () => {
-    const response = (await request(server).get("/logout")).set({
-      " x-api-key": token,
+    const response = await request(server).get("/logout").set({
+      "x-api-key": token,
     });
     expect(response.status).toBe(200);
   });

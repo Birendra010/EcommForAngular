@@ -120,7 +120,7 @@ const loginUser = async function (req, res) {
     res.status(200).send({
       status: true,
       user: userInfo,
-      message: " login seccessfully",
+      message: "login seccessfully",
       response,
       token: token,
     });

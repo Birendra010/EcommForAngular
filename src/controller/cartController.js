@@ -7,7 +7,7 @@ const createCart = async function (req, res) {
   try {
     let userId = req.user.userId;
     let data = req.body;
-    console.log("data",data)
+
     if (isValidBody(data)) {
       return res
         .status(400)
@@ -19,16 +19,16 @@ const createCart = async function (req, res) {
         .status(400)
         .send({ status: false, message: "please provide valid product Id" });
     }
-    let product = await productModel.findById(productId);
+
+    let product = await productModel.findOne({_id:productId.toString()});
     if (!product) {
       return res
-        .status(400)
+        .status(404)
         .send({
           status: false,
-          message: "this product is not found in product model",
+          message: "this product is not found in this productId",
         });
     }
-
     let userCart = await cartModel.findOne({ userId: userId });
     let cart = {};
     if (!userCart) {
@@ -37,10 +37,7 @@ const createCart = async function (req, res) {
       cart.totalItems = 1;
       cart.totalPrice = product.price;
       const newCart = await cartModel.create(cart);
-      return res
-        .status(201)
-        .send({
-          status: false,
+      return res.status(201).send({status: false,
           message: "item added successfully",
           cart: newCart,
         });
@@ -66,13 +63,13 @@ const createCart = async function (req, res) {
       .findByIdAndUpdate(userCart._id, cart, { new: true })
       .populate("items.productId");
     return res
-      .status(201)
+      .status(200)
       .send({ status: true, message: "item added successfully", cart: update });
   } catch (err) {
     return res.status(500).send({ status: false, error: err.message });
   }
 };
-
+// get cart details when user is login
 const getCartDetails = async function (req, res) {
   try {
     let userId = req.user.userId;
@@ -90,7 +87,7 @@ const getCartDetails = async function (req, res) {
     return res.status(500).send({ status: false, error: error.message });
   }
 };
-
+//addToCartFromLocalStorage 
 const addToCartFromLocalStorage = async (req, res) => {
   try {
     let userId = getUserId();
@@ -152,7 +149,7 @@ const addToCartFromLocalStorage = async (req, res) => {
     return res.status(500).send({ status: false, error: error.message });
   }
 };
-
+//update caert 
 const updateCart = async (req, res) => {
   try {
     let userId = req.user.userId;
@@ -160,12 +157,14 @@ const updateCart = async (req, res) => {
       return res.status(400).send({ status: false, message: "invlid request" });
     }
     let { productId, quantity } = req.body;
+
     if (!productId) {
       return res
         .status(400)
         .send({ status: false, message: "please provide productId" });
     }
-    let product = await productModel.findById(productId._id);
+    let product = await productModel.findOne({ _id: productId.toString() });
+
     if (!product) {
       return res
         .status(404)
@@ -174,19 +173,27 @@ const updateCart = async (req, res) => {
     if (quantity > product.stock) {
       return res.status(400).send({
         status: false,
-        message: `maximum quantiy to buy is ${product.stock} this product because stock not available `,
+        // message: "maximum quantity to buy this product  stock is  not available",
+         message: `maximum quantiy to buy is ${product.stock} this product because stock not available `,
       });
     }
+
+
+    
     let userCart = await cartModel.findOne({ userId });
+    // console.log(userCart)
     let item = userCart.items.findIndex(
-      (item) => item.productId.toString() == productId._id.toString()
+      (item) => item.productId.toString() == productId.toString()
     );
+    console.log(item);
     if (item === -1) {
       return res.status(404).send({
         status: false,
         message: "This product not found in your cart",
       });
     }
+
+    console.log("line 194")
     let updatedCart = {};
     const cartItem = userCart.items[item];
     if (quantity < 1) {
@@ -196,12 +203,13 @@ const updateCart = async (req, res) => {
         .findByIdAndUpdate(
           userCart._id,
           {
-            $pull: { items: { productId: productId._id } },
+            $pull: { items: { productId: productId._id.toString() } },
             $set: { totalItems, totalPrice },
           },
           { new: true }
         )
         .populate("items.productId");
+      console.log("line 210");
       return res
         .status(200)
         .send({ status: true, message: "cart  updated", cart: cart });

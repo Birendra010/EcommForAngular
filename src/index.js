@@ -22,7 +22,7 @@ mongoose
 // console.log("MongoDb is connected"))
   .catch((err) => console.log(err));
 
-const server = app.listen(5000, () => {
+const server = app.listen(3001, () => {
   console.log(`Express app running on port ${process.env.PORT || 5000}...`);
 });
 module.exports = server;
