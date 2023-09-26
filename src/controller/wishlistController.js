@@ -1,16 +1,27 @@
 const userModel = require("../models/userModel");
 const productModel = require("../models/productModel");
 const wishlistModel = require("../models/wishlistModel");
+const mongoose = require("mongoose")
+const ObjectId = mongoose.Types.ObjectId;
+
+const validObjectId = function (objectId) {
+  return mongoose.Types.ObjectId.isValid(objectId);
+};
+
 
 const addToWishlist = async function (req, res) {
   try {
     let userId = req.user.userId;
     let productId = req.body.productId;
+
+      if (!ObjectId.isValid(productId)) {
+       return res.status(400).send({ status: false, message: "invalid productId" });
+      }
     let product = await productModel.findById(productId);
     if (!product) {
       return res
-        .status(400)
-        .send({ status: false, message: " invalid productId " });
+        .status(404)
+        .send({ status: false, message: " product not found with given  productId " });
     }
     let user = await userModel.findById(userId);
     if (!user) {

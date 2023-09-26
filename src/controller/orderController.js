@@ -11,233 +11,217 @@ const validObjectId = function (objectId) {
 };
 
 const createOrder = async (req, res) => {
-
   //if guest checkout
-//   try {
-//     let { userId, items, totalItems, totalPrice } = req.body.order;
-//     let { bname, email, password, name, phone, house, city, state, pincode } =
-//       req.body.form;
-//     //if guest checkout
-//     if (email.length) {
-//       let user = await userModel.findOne({ email });
-//       if (user) {
-//         return res
-//           .status(400)
-//           .send({
-//             status: false,
-//             message: "You have an account,Please login ",
-//           });
-//       }
-//       const orderDetails = {
-//         name: bname,
-//         email,
-//         password,
-//         items,
-//         totalItems: totalItems,
-//         totalPrice: totalPrice,
-//         products: items,
+  //   try {
+  //     let { userId, items, totalItems, totalPrice } = req.body.order;
+  //     let { bname, email, password, name, phone, house, city, state, pincode } =
+  //       req.body.form;
+  //     //if guest checkout
+  //     if (email.length) {
+  //       let user = await userModel.findOne({ email });
+  //       if (user) {
+  //         return res
+  //           .status(400)
+  //           .send({
+  //             status: false,
+  //             message: "You have an account,Please login ",
+  //           });
+  //       }
+  //       const orderDetails = {
+  //         name: bname,
+  //         email,
+  //         password,
+  //         items,
+  //         totalItems: totalItems,
+  //         totalPrice: totalPrice,
+  //         products: items,
 
-//         shippingInfo: {
-//           name,
-//           phone,
-//           address: {
-//             house: house,
-//             city: city,
-//             state: state,
-//             pincode: pincode,
-//           },
-//         },
-//       };
+  //         shippingInfo: {
+  //           name,
+  //           phone,
+  //           address: {
+  //             house: house,
+  //             city: city,
+  //             state: state,
+  //             pincode: pincode,
+  //           },
+  //         },
+  //       };
 
-//       let hash = await bcrypt.hash(password, 10);
+  //       let hash = await bcrypt.hash(password, 10);
 
-//       let newUser = await userModel.create({
-//         name: bname,
-//         email: email,
-//         password: hash,
-//       });
-//       orderDetails.userId = newUser._id;
+  //       let newUser = await userModel.create({
+  //         name: bname,
+  //         email: email,
+  //         password: hash,
+  //       });
+  //       orderDetails.userId = newUser._id;
 
-//       let order = await orderModel.create(orderDetails);
-//       items.forEach(async (item) => {
-//         await productModel.findByIdAndUpdate(
-//           item.productId._id,
-//           { $inc: { stock: -item.quantity } },
-//           { new: true }
-//         );
-//       });
-//       // console.log(order);
-//       return res
-//         .status(201)
-//         .send({ status: true, message: "Order placed ", order });
-//     } else {
-//       let cartDetail = await cartModel
-//         .findOne({ userId: userId })
-//         .populate("items.productId", "stock");
+  //       let order = await orderModel.create(orderDetails);
+  //       items.forEach(async (item) => {
+  //         await productModel.findByIdAndUpdate(
+  //           item.productId._id,
+  //           { $inc: { stock: -item.quantity } },
+  //           { new: true }
+  //         );
+  //       });
+  //       // console.log(order);
+  //       return res
+  //         .status(201)
+  //         .send({ status: true, message: "Order placed ", order });
+  //     } else {
+  //       let cartDetail = await cartModel
+  //         .findOne({ userId: userId })
+  //         .populate("items.productId", "stock");
 
-//       if (!cartDetail) {
-//         return res
-//           .status(404)
-//           .send({ status: false, message: "User cart not found" });
-//       }
-//       if (items.length <= 0) {
-//         return res.status(400).send({
-//           status: false,
-//           message: "Please add some items in cart to place order",
-//         });
-//       }
+  //       if (!cartDetail) {
+  //         return res
+  //           .status(404)
+  //           .send({ status: false, message: "User cart not found" });
+  //       }
+  //       if (items.length <= 0) {
+  //         return res.status(400).send({
+  //           status: false,
+  //           message: "Please add some items in cart to place order",
+  //         });
+  //       }
 
-//       const filter = items.filter((x) => x.quantity > x.productId.stock);
-//       if (filter.length > 0) {
-//         return res.status(400).send({
-//           status: false,
-//           message: "some product are out of stock",
-//           filter,
-//           items,
-//         });
-//       }
+  //       const filter = items.filter((x) => x.quantity > x.productId.stock);
+  //       if (filter.length > 0) {
+  //         return res.status(400).send({
+  //           status: false,
+  //           message: "some product are out of stock",
+  //           filter,
+  //           items,
+  //         });
+  //       }
 
-//       let order = {
-//         userId,
-//         items: items,
-//         totalItems: totalItems,
-//         totalPrice: totalPrice,
-//         products: items,
-//         shippingInfo: {
-//           name: name,
-//           phone: phone,
-//           address: {
-//             house: house,
-//             city: city,
-//             state: state,
-//             pincode: pincode,
-//           },
-//         },
-//       };
-//       // create order and update product stocks
-//       let createdata = await orderModel.create(order);
-//       items.forEach(async (item) => {
-//         await productModel.findByIdAndUpdate(
-//           item.productId._id,
-//           { $inc: { stock: -item.quantity } },
-//           { new: true }
-//         );
-//       });
-//       //cart empty after order  successfully placed
-//       await cartModel.findByIdAndUpdate(
-//         cartDetail._id,
-//         { $set: { items: [], totalItems: 0, totalPrice: 0 } },
-//         { new: true }
-//       );
+  //       let order = {
+  //         userId,
+  //         items: items,
+  //         totalItems: totalItems,
+  //         totalPrice: totalPrice,
+  //         products: items,
+  //         shippingInfo: {
+  //           name: name,
+  //           phone: phone,
+  //           address: {
+  //             house: house,
+  //             city: city,
+  //             state: state,
+  //             pincode: pincode,
+  //           },
+  //         },
+  //       };
+  //       // create order and update product stocks
+  //       let createdata = await orderModel.create(order);
+  //       items.forEach(async (item) => {
+  //         await productModel.findByIdAndUpdate(
+  //           item.productId._id,
+  //           { $inc: { stock: -item.quantity } },
+  //           { new: true }
+  //         );
+  //       });
+  //       //cart empty after order  successfully placed
+  //       await cartModel.findByIdAndUpdate(
+  //         cartDetail._id,
+  //         { $set: { items: [], totalItems: 0, totalPrice: 0 } },
+  //         { new: true }
+  //       );
 
-//       return res.status(200).send({
-//         status: true,
-//         message: "order placed successfully",
-//         data: createdata,
-//       });
-//     }
-//   } catch (error) {
-//     return res.status(500).send({ error: error.message });
+  //       return res.status(200).send({
+  //         status: true,
+  //         message: "order placed successfully",
+  //         data: createdata,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     return res.status(500).send({ error: error.message });
   //   }
-  
 
+  try {
+    const userId = req.user.userId;
+    let { name, phone, house, city, state, pincode } = req.body;
+    if (Object.keys(req.body).length !== 6) {
+      return res.status(400).send({ status: false, message: "invalid data" });
+    }
 
-try {
-  const userId = req.user.userId;
-  let { name, phone, house, city, state, pincode } = req.body;
-  if (Object.keys(req.body).length !== 6) {
-    return res.status(400).send({ status: false, message: "invalid data" });
-  }
+    const formError = orderSchema.validate(req.body);
+    if (formError.error) {
+      return res
+        .status(400)
+        .send({ message: formError.error.details[0].message });
+    }
+    let cart = await cartModel
+      .findOne({ userId: userId })
+      .populate("items.productId", "stock");
 
-  const formError = orderSchema.validate(req.body);
-  if (formError.error) {
-    return res
-      .status(400)
-      .send({ message: formError.error.details[0].message });
-  }
-  let cart = await cartModel
-    .findOne({ userId: userId })
-    .populate("items.productId", "stock");
+    if (!cart) {
+      return res
+        .status(404)
+        .send({ status: false, message: "User cart not found" });
+    }
+    // let cartItems = cart.cartItems;
+    //  if there is nothing in cart
+    let items = cart.items;
+    if (items.length <= 0) {
+      return res.status(400).send({
+        status: false,
+        message: "Please add some items in cart to place order",
+      });
+    }
+    const filter = cart.items.filter((x) => x.quantity > x.productId.stock);
+    if (filter.length > 0) {
+      return res.status(400).send({
+        status: false,
+        message: "some product are out of stock",
+        filter,
+      });
+    }
 
-  if (!cart) {
-    return res
-      .status(404)
-      .send({ status: false, message: "User cart not found" });
-  }
-  // let cartItems = cart.cartItems;
-  //  if there is nothing in cart
-console.log(cart.items.length);
-  if (cart.items.length <= 0) {
-    return res.status(400).send({
-      status: false,
-      message: "Please add some items in cart to place order",
-    });
-  }
-  const filter = cart.items.filter((x) => x.quantity > x.productId.stock);
-  if (filter.length > 0) {
-    return res.status(400).send({
-      status: false,
-      message: "some product are out of stock",
-      filter,
-      
-    });
-  }
-  let order = {
-    userId,
-    items,
-    totalItems,
-    totalPrice,
-    // products: items,
-    shippingInfo: {
-      name,
-      phone,
-      address: {
-        house,
-        city,
-        state ,
-        pincode,
+    let order = {
+      userId,
+      items: items,
+      totalItems: cart.totalItems,
+      totalPrice: cart.totalPrice,
+      products: items,
+      shippingInfo: {
+        name,
+        phone,
+        address: {
+          house,
+          city,
+          state,
+          pincode,
+        },
       },
-    },
-  };
-  // create order and update product stocks
-        let userOrder = await orderModel.create(order);
-        items.forEach(async (item) => {
-          await productModel.findByIdAndUpdate(
-            item.productId._id,
-            { $inc: { stock: -item.quantity } },
-            { new: true }
-          );
-        });
-  
-  await cartModel.findByIdAndUpdate(
-    cart._id,
+    };
+    // create order and update product stocks
+    let userOrder = await orderModel.create(order);
+    // console.log(userOrder)
+    items.forEach(async (item) => {
+      await productModel.findByIdAndUpdate(
+        item.productId,
+        { $inc: { stock: -item.quantity } },
+        { new: true }
+      );
+    });
 
-           { $set: { items: [], totalItems: 0, totalPrice: 0 } },
-            { new: true }
-  );
-  return res.status(200).send({status:true,message:"Order seccuss" , userOrder})
-} catch (error) {
-  return res.status(500).send({error:error.message})
-}
+    await cartModel.findByIdAndUpdate(
+      cart._id,
 
+      { $set: { items: [], totalItems: 0, totalPrice: 0 } },
+      { new: true }
+    );
+
+    return res
+      .status(200)
+      .send({ status: true, message: "Order seccuss", userOrder });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({ error: error.message });
+  }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ///get all orders
 const getOrder = async function (req, res) {
@@ -265,6 +249,11 @@ const getOrderById = async (req, res) => {
   try {
     // let userId = req.user.userId;
     let orderId = req.params.orderId;
+    if (!validObjectId(orderId)) {
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter a valid orderId" });
+    }
     let order = await orderModel
       .findOne({
         _id: orderId,
@@ -325,12 +314,15 @@ const cancelProductInOrder = async (req, res) => {
         .status(400)
         .send({ status: false, message: "Order cannot be updated" });
     }
-    let product = await productModel.findById(productId);
 
+    let product = await productModel.findById(productId);
     if (!product) {
       return res
         .status(404)
-        .send({ status: false, message: "productId invalid" });
+        .send({
+          status: false,
+          message: "product not found with given productId",
+        });
     }
     if (userOrder.items.length === 0) {
       return res
@@ -419,7 +411,7 @@ const cancelOrder = async (req, res) => {
     let userOrder = await orderModel
       .findById(orderId)
       .populate("items.productId");
-
+    // console.log(userOrder.userId)
     if (userId.valueOf() != userOrder.userId.valueOf()) {
       return res.status(403).send({
         status: false,
@@ -452,6 +444,7 @@ const cancelOrder = async (req, res) => {
       .status(200)
       .send({ status: true, message: "order cancled", order });
   } catch (error) {
+    console.log(error);
     return res.status(500).send({ error: error.message });
   }
 };

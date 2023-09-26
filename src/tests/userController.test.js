@@ -74,7 +74,7 @@ describe("User signup ", () => {
   // });
 });
 
-//login
+//*********login***********
 // invalid input field request
 describe("User login", () => {
   it("should return 422 if Unprocessable Entity", async () => {
@@ -135,7 +135,7 @@ describe("User login", () => {
   });
 });
 
-//forgot password
+//************forgot password*************
 describe("forgot password", () => {
   it("should return 400 if email is not present ", async () => {
     const response = await request(server).post("/forgot-password").send({
@@ -160,7 +160,7 @@ describe("forgot password", () => {
   });
 });
 
-// update password
+// ************update password************
 describe("update password ", () => {
   it("should return 400 if password field is empty ", async () => {
     const response = await request(server)
@@ -185,8 +185,8 @@ describe("update password ", () => {
   // });
 });
 
-//logout
-// 
+//*******logout************
+ 
 describe("logout", () => {
   it("should return 401 if token is not present in header", async () => {
     const response = await request(server).get("/logout").send({}).set({});

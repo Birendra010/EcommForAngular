@@ -20,14 +20,12 @@ const createCart = async function (req, res) {
         .send({ status: false, message: "please provide valid product Id" });
     }
 
-    let product = await productModel.findOne({_id:productId.toString()});
+    let product = await productModel.findOne({ _id: productId.toString() });
     if (!product) {
-      return res
-        .status(404)
-        .send({
-          status: false,
-          message: "this product is not found in this productId",
-        });
+      return res.status(404).send({
+        status: false,
+        message: "this product is not found in this productId",
+      });
     }
     let userCart = await cartModel.findOne({ userId: userId });
     let cart = {};
@@ -37,7 +35,10 @@ const createCart = async function (req, res) {
       cart.totalItems = 1;
       cart.totalPrice = product.price;
       const newCart = await cartModel.create(cart);
-      return res.status(201).send({status: false,
+      return res
+        .status(201)
+        .send({
+          status: false,
           message: "item added successfully",
           cart: newCart,
         });
@@ -87,7 +88,7 @@ const getCartDetails = async function (req, res) {
     return res.status(500).send({ status: false, error: error.message });
   }
 };
-//addToCartFromLocalStorage 
+//addToCartFromLocalStorage
 const addToCartFromLocalStorage = async (req, res) => {
   try {
     let userId = getUserId();
@@ -149,7 +150,7 @@ const addToCartFromLocalStorage = async (req, res) => {
     return res.status(500).send({ status: false, error: error.message });
   }
 };
-//update caert 
+//update caert
 const updateCart = async (req, res) => {
   try {
     let userId = req.user.userId;
@@ -174,18 +175,16 @@ const updateCart = async (req, res) => {
       return res.status(400).send({
         status: false,
         // message: "maximum quantity to buy this product  stock is  not available",
-         message: `maximum quantiy to buy is ${product.stock} this product because stock not available `,
+        message: `maximum quantiy to buy is ${product.stock} this product because stock not available `,
       });
     }
 
-
-    
     let userCart = await cartModel.findOne({ userId });
     // console.log(userCart)
     let item = userCart.items.findIndex(
       (item) => item.productId.toString() == productId.toString()
     );
-    console.log(item);
+
     if (item === -1) {
       return res.status(404).send({
         status: false,
@@ -193,7 +192,6 @@ const updateCart = async (req, res) => {
       });
     }
 
-    console.log("line 194")
     let updatedCart = {};
     const cartItem = userCart.items[item];
     if (quantity < 1) {
@@ -251,3 +249,4 @@ module.exports = {
   updateCart,
   addToCartFromLocalStorage,
 };
+
