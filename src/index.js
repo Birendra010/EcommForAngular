@@ -1,14 +1,26 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
-const route = require("./route/route");
+const route = require("./routes/route");
 const app = express();
 const cors = require("cors");
-
+const swaggerJSDoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+const {swaggerDefinition} = require("./docs/apidoc.js");
 dotenv.config({ path: ".env" });
 app.use(express.json());
 app.use(cors({ origin: "*" }));
 app.use("/", route);
+
+// swagger config
+const options = {
+  swaggerDefinition,
+  apis: ["./routes/*.js"],
+};
+
+const swaggerSpec = swaggerJSDoc(options);
+
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 mongoose
   .connect(
@@ -18,11 +30,10 @@ mongoose
     }
   )
 
-// .then(() =>
-// console.log("MongoDb is connected"))
+  .then(() => console.log("MongoDb is connected"))
   .catch((err) => console.log(err));
 
-const server = app.listen(3001, () => {
-  console.log(`Express app running on port ${process.env.PORT || 5000}...`);
+const server = app.listen(process.env.PORT, () => {
+  console.log(`Express app running on port ${process.env.PORT}...`);
 });
 module.exports = server;

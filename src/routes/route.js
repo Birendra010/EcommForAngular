@@ -56,11 +56,11 @@ router.post("/payment", stripeController.payment)
 router.post("/paymentStatus", stripeController.paymentStatus);
 
 
-router.all("/*", (req, res) => {
-  return res
-    .status(404)
-    .send({ status: false, msg: "   provide a correct end point " });
-});
+// router.all("/*", (req, res) => {
+//   return res
+//     .status(404)
+//     .send({ status: false, msg: "   provide a correct end point " });
+// });
 
 module.exports = router;
 

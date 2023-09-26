@@ -94,11 +94,12 @@ const loginUser = async function (req, res) {
       process.env.REF_TOKEN_SECRET,
       { expiresIn: process.env.REF_TOKEN_EXPIRE }
     );
-    const response = {
-      status: "Logged in",
-      token: token,
-      refreshToken: refreshToken,
-    };
+    // const response = {
+    //   status: "Logged in",
+    //   // user,
+    //   token: token,
+    //   refreshToken: refreshToken,
+    // };
     let oldTokens = user.tokens || [];
     if (oldTokens.length) {
       oldTokens = oldTokens.filter((t) => {
@@ -113,16 +114,17 @@ const loginUser = async function (req, res) {
         { token, signedAt: new Date(Date.now() + 5 * 60 * 1000) },
       ],
     });
-    const userInfo = {
-      email: user.email,
-    };
+    // const userInfo = {
+    //   email: user.email,
+    // };
     UserIdToLocal = user._id;
     res.status(200).send({
       status: true,
-      user: userInfo,
       message: "login seccessfully",
-      response,
+      email: user.email,
+      // response,
       token: token,
+      refreshToken:refreshToken
     });
   } catch (error) {
     return res.status(500).send({ status: false, error: error.message });
@@ -159,7 +161,7 @@ const refreshToken = (req, res) => {
 const forgetPassword = async (req, res) => {
   try {
     const email = req.body.email;
-    const emailToken = req.body.emailToken
+    // const emailToken = req.body.emailToken
 
     if (!email) {
       return res.status(400).send({status:false,message:"please enter your register email!"})
@@ -171,22 +173,23 @@ const forgetPassword = async (req, res) => {
         .send({ status: false, message: " email not found" });
     }
     if (userData) {
-      // const randomString = randomstring.generate();
+      const randomString = randomstring.generate();
 
       await userModel.findOneAndUpdate(
         { email: email },
         {
           $set: {
-            token: emailToken,
+            token: randomString,
             tokenExp: Math.round(new Date(Date.now() + 2 * 60 * 1000)),
           },
           new: true,
         }
       );
-      sendResetPasswordMail(userData.email, emailToken);
+      sendResetPasswordMail(userData.email, randomString);
 
       res.status(200).send({
         status: true,
+        emailToken:randomString,
         message: "please check your inbox of mail and reset your password ",
       });
     } else {
