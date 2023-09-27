@@ -1,5 +1,30 @@
+const {
+  createUser,
+  createUserBody,
+  loginUser,
+  loginUserBody,
+  refreshToken,
+  refreshTokenBody,
+  forgotPasswordBody,
+  forgotPassword,
+  updatePassword,
+  updatePasswordBody,
+  logout,
+} = require("./userDoc");
 
-const {createUser,createUserBody, loginUser,loginUserBody,refreshToken,refreshTokenBody}=require('./userDoc')
+const {
+  createCartBody,
+  createCart,
+  getCartDetails,
+  updateCart,
+  updateCartBody,
+} = require("./cartDoc");
+const {
+  getLimitedProducts,
+  getPopularProducts,
+  getAllproducts,
+  getProductById
+} = require("./productDoc");
 const swaggerDefinition = {
   // previous content here
   openapi: "3.0.0",
@@ -28,6 +53,7 @@ const swaggerDefinition = {
     //   description: "Production Server",
     // },
   ],
+
   //   tags: [
   //     {
   //       name: "Roles",
@@ -46,20 +72,55 @@ const swaggerDefinition = {
     "/refresh-token": {
       post: refreshToken,
     },
+
+    "/forgot-password": {
+      post: forgotPassword,
+    },
+
+    "/reset-password/{emailToken}": {
+      put: updatePassword,
+    },
+    "/logout": {
+      get: logout,
+    },
+
+    "/cart": {
+      post: createCart,
+      get: getCartDetails,
+      put: updateCart,
+    },
+
+    "/limited-products": {
+      get: getLimitedProducts,
+    },
+
+    "/popular-products": {
+      get: getPopularProducts,
+    },
+    "/products": {
+      get: getAllproducts,
+    },
+    "/product/{id}": {
+      get: getProductById,
+    },
   },
 
   components: {
     securitySchemes: {
-      bearerAuth: {
-        type: "http",
-        scheme: "bearer",
-        bearerFormat: "JWT",
+      ApiKeyAuth: {
+        type: "apiKey",
+        in: "header",
+        name: "X-API-KEY",
       },
     },
     schemas: {
       createUserBody,
       loginUserBody,
       refreshTokenBody,
+      forgotPasswordBody,
+      updatePasswordBody,
+      createCartBody,
+      updateCartBody,
     },
   },
 };

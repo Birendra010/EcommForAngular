@@ -11,6 +11,7 @@ const createUser = {
     },
     required: true,
   },
+
   responses: {
     201: {
       description: "User created successfully!",
@@ -192,6 +193,173 @@ const refreshToken = {
   },
 };
 
+const forgotPassword = {
+  tags: ["Users"],
+  description: "please check your inbox of mail and reset your password",
+  requestBody: {
+    content: {
+      "application/json": {
+        schema: {
+          $ref: "#/components/schemas/forgotPasswordBody",
+        },
+      },
+    },
+    required: true,
+  },
+  responses: {
+    200: {
+      description: "please check your inbox of mail and reset your password",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              status: {
+                type: "boolean",
+              },
+              message: {
+                type: "string",
+                example:
+                  "please check your inbox of mail and reset your password",
+              },
+
+              emailToken: {
+                type: "string",
+                required: true,
+              },
+            },
+          },
+        },
+      },
+    },
+    500: {
+      description: "Internal Server Error",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              message: {
+                type: "string",
+                example: "Internal Server Error",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+const updatePassword = {
+  tags: ["Users"],
+  description: "password updateded",
+  requestBody: {
+    content: {
+      "application/json": {
+        schema: {
+          $ref: "#/components/schemas/updatePasswordBody",
+        },
+      },
+    },
+    required: true,
+  },
+  parameters: [
+    {
+      name: "emailToken",
+      in: "path",
+      description: "token from Email",
+      required: true,
+      type: "string",
+    },
+  ],
+  responses: {
+    200: {
+      description: "when password updated  successfully",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              status: {
+                type: "boolean",
+              },
+              message: {
+                type: "string",
+                example: "user password has been reset or update",
+              },
+            },
+          },
+        },
+      },
+    },
+    500: {
+      description: "Internal Server Error",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              message: {
+                type: "string",
+                example: "Internal Server Error",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+const logout = {
+  tags: ["Users"],
+  description: "success",
+  
+  security: 
+    [{
+      ApiKeyAuth: []
+    }],
+
+  responses: {
+    200: {
+      description: "when user logout successfully",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              status: {
+                type: "boolean",
+              },
+              message: {
+                type: "string",
+                example: "logout successfully",
+              },
+            },
+          },
+        },
+      },
+    },
+    500: {
+      description: "Internal Server Error",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              message: {
+                type: "string",
+                example: "Internal Server Error",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
 const createUserBody = {
   type: "object",
   properties: {
@@ -225,7 +393,7 @@ const loginUserBody = {
     password: {
       type: "string",
       description: "unencrypted user's password",
-      example: "!1234aWe1Ro3$#",
+      example: "123456",
     },
   },
 };
@@ -235,18 +403,42 @@ const refreshTokenBody = {
   properties: {
     refreshToken: {
       type: "string",
-     
+
       example:
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTBkODljNjhhNWMwODc3OWQyZDMxOTAiLCJpYXQiOjE2OTU3MzM1NDYsImV4cCI6MTY5NTczNDc0Nn0.PdF_IrSEphPaQrfZiAe5Dh1pVA-i4N9MMa3g4Zrf4Hk",
     },
   },
 };
+const forgotPasswordBody = {
+  type: "object",
+  properties: {
+    email: {
+      type: "string",
 
-module.exports = {
-  createUser,
+      example: "john.snow@email.com",
+    },
+  },
+};
+
+const updatePasswordBody = {
+  type: "object",
+  properties: {
+    newPassword: {
+      type: "string",
+      example: "123456",
+    },
+  },
+};
+
+module.exports = {createUser,
   createUserBody,
   loginUserBody,
   loginUser,
   refreshTokenBody,
   refreshToken,
+  forgotPassword,
+  forgotPasswordBody,
+  updatePassword,
+  updatePasswordBody,
+  logout,
 };

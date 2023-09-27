@@ -27,7 +27,9 @@ const createProduct = async function (req, res) {
 const getLimitedProducts = async (req, res) => {
   try {
     let products = await productModel.find().limit(30);
-    return res.status(200).send({ status: true, products });
+    return res
+      .status(200)
+      .send({ status: true, message: "successful", products });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
@@ -36,7 +38,7 @@ const getLimitedProducts = async (req, res) => {
 const getPopularProducts = async (req, res) => {
   try {
     let products = await productModel.find().limit(5);
-    return res.status(200).send({ status: true, products });
+    return res.status(200).send({ status: true, message: "successful", products });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
@@ -45,7 +47,7 @@ const getPopularProducts = async (req, res) => {
 const getAllproducts = async (req, res) => {
   try {
     let products = await productModel.find();
-    return res.status(200).send({ status: true, products });
+    return res.status(200).send({ status: true,message: "successful", products });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }

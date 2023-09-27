@@ -111,7 +111,7 @@ const loginUser = async function (req, res) {
     await userModel.findByIdAndUpdate(user._id, {
       tokens: [
         ...oldTokens,
-        { token, signedAt: new Date(Date.now() + 5 * 60 * 1000) },
+        { token, signedAt: new Date(Date.now() + 20 * 60 * 1000) },
       ],
     });
     // const userInfo = {
@@ -189,8 +189,8 @@ const forgetPassword = async (req, res) => {
 
       res.status(200).send({
         status: true,
-        emailToken:randomString,
         message: "please check your inbox of mail and reset your password ",
+        token:randomString,
       });
     } else {
       res
@@ -207,8 +207,8 @@ const updatePassword = async (req, res) => {
   try {
     const token = req.params.emailToken;
     // console.log("token",token)
-    const tokenData = await userModel.findOne({ token: token });
-    // console.log("tokendata" , tokenData)
+    const tokenData = await userModel.findOne({token});
+    console.log(tokenData )
     if (!tokenData) {
       return res
         .status(400)
@@ -237,7 +237,7 @@ const updatePassword = async (req, res) => {
     return res.status(200).send({
       status: true,
       message: "User password has been reset",
-      data: userData,
+      // data: userData,
     });
     // } else {
     //   res.status(400).send({ success: false, message: "invalid token " });

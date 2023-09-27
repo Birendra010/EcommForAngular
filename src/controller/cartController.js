@@ -38,7 +38,7 @@ const createCart = async function (req, res) {
       return res
         .status(201)
         .send({
-          status: false,
+          status: true,
           message: "item added successfully",
           cart: newCart,
         });
@@ -62,7 +62,7 @@ const createCart = async function (req, res) {
     cart.totalItems = userCart.totalItems + 1;
     let update = await cartModel
       .findByIdAndUpdate(userCart._id, cart, { new: true })
-      .populate("items.productId");
+      // .populate("items.productId");
     return res
       .status(200)
       .send({ status: true, message: "item added successfully", cart: update });
@@ -80,7 +80,7 @@ const getCartDetails = async function (req, res) {
       .findOne({ userId })
 
       .populate("items.productId");
-
+      //  console.log(userCart)
     return res
       .status(200)
       .send({ status: true, message: "Success", cart: userCart });
