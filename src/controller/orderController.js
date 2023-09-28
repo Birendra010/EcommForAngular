@@ -317,12 +317,10 @@ const cancelProductInOrder = async (req, res) => {
 
     let product = await productModel.findById(productId);
     if (!product) {
-      return res
-        .status(404)
-        .send({
-          status: false,
-          message: "product not found with given productId",
-        });
+      return res.status(404).send({
+        status: false,
+        message: "product not found with given productId",
+      });
     }
     if (userOrder.items.length === 0) {
       return res
@@ -332,7 +330,7 @@ const cancelProductInOrder = async (req, res) => {
     // get quantity of removed product
     let quantity = 0;
     userOrder.items.map((x) => {
-      if (x.productId.valueOf() === productId) {
+      if (x.productId.valueOf() === productId && x.canceled === false) {
         quantity = x.quantity;
       }
     });

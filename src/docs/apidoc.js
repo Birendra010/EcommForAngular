@@ -23,8 +23,25 @@ const {
   getLimitedProducts,
   getPopularProducts,
   getAllproducts,
-  getProductById
+  getProductById,
 } = require("./productDoc");
+
+const {
+  createOrder,
+  createOrderBody,
+  getOrder,
+  getOrderById,
+  cancelProductInOrder,cancelProductInOrderBody,cancelOrder
+} = require("./orderDoc");
+
+
+const {
+  createWishlist,
+  createWishlistBody,
+  getWishlist,
+  updateWishlist,
+  updateWishlistBody,
+} = require("./wishlistDoc");
 const swaggerDefinition = {
   // previous content here
   openapi: "3.0.0",
@@ -103,6 +120,22 @@ const swaggerDefinition = {
     "/product/{id}": {
       get: getProductById,
     },
+    "/order": {
+      post: createOrder,
+      get: getOrder,
+    },
+    "/order/{orderId}": {
+      get: getOrderById,
+      put:cancelProductInOrder
+    },
+    "/order/cancel/{orderId}": {
+      put:cancelOrder
+    },
+    "/wishlist": {
+      post: createWishlist,
+      get: getWishlist,
+      put:updateWishlist
+    }
   },
 
   components: {
@@ -121,6 +154,10 @@ const swaggerDefinition = {
       updatePasswordBody,
       createCartBody,
       updateCartBody,
+      createOrderBody,
+      cancelProductInOrderBody,
+      createWishlistBody,
+      updateWishlistBody
     },
   },
 };

@@ -35,13 +35,11 @@ const createCart = async function (req, res) {
       cart.totalItems = 1;
       cart.totalPrice = product.price;
       const newCart = await cartModel.create(cart);
-      return res
-        .status(201)
-        .send({
-          status: true,
-          message: "item added successfully",
-          cart: newCart,
-        });
+      return res.status(201).send({
+        status: true,
+        message: "item added successfully",
+        cart: newCart,
+      });
     }
 
     let quantity = 1;
@@ -60,9 +58,10 @@ const createCart = async function (req, res) {
     let price = product.price;
     cart.totalPrice = userCart.totalPrice + price * quantity;
     cart.totalItems = userCart.totalItems + 1;
-    let update = await cartModel
-      .findByIdAndUpdate(userCart._id, cart, { new: true })
-      // .populate("items.productId");
+    let update = await cartModel.findByIdAndUpdate(userCart._id, cart, {
+      new: true,
+    });
+    // .populate("items.productId");
     return res
       .status(200)
       .send({ status: true, message: "item added successfully", cart: update });
@@ -80,7 +79,7 @@ const getCartDetails = async function (req, res) {
       .findOne({ userId })
 
       .populate("items.productId");
-      //  console.log(userCart)
+    //  console.log(userCart)
     return res
       .status(200)
       .send({ status: true, message: "Success", cart: userCart });
@@ -207,13 +206,13 @@ const updateCart = async (req, res) => {
           { new: true }
         )
         .populate("items.productId");
-      console.log("line 210");
+      // console.log("line 210");
       return res
         .status(200)
         .send({ status: true, message: "cart  updated", cart: cart });
     } else if (quantity < cartItem.quantity) {
       updatedCart.items = userCart.items;
-      updatedCart.totalItems = userCart.totalItems - 1;
+      updatedCart.totalItems = userCart.totalItems - (cartItem.quantity - quantity);
       updatedCart.totalPrice =
         userCart.totalPrice +
         (quantity * product.price - cartItem.quantity * product.price);
@@ -224,9 +223,14 @@ const updateCart = async (req, res) => {
       return res
         .status(200)
         .send({ status: true, message: "cart updated", cart: cart });
+    } else if (cartItem.quantity === quantity) {
+      return res
+        .status(200)
+        .send({ status: true, message: "cart updated", cart: userCart });
     } else {
       updatedCart.items = userCart.items;
-      updatedCart.totalItems = userCart.totalItems + 1;
+           updatedCart.totalItems = (userCart.totalItems - cartItem.quantity) + quantity;
+
       updatedCart.totalPrice =
         userCart.totalPrice +
         (quantity * product.price - cartItem.quantity * product.price);
@@ -249,4 +253,3 @@ module.exports = {
   updateCart,
   addToCartFromLocalStorage,
 };
-

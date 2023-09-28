@@ -6,36 +6,29 @@ const number = {
 };
 
 const product = {
-  productId: {
-    type: "object",
-    properties: {
-      _id: string,
-      title: string,
-      brand: string,
-      category: string,
-      description: string,
-      stock: number,
-      price: number,
-      rating: number,
-      thumbnail: string,
-      image_url: {
-        type: "array",
-        items: string,
-      },
-    },
+  _id: string,
+  title: string,
+  brand: string,
+  category: string,
+  description: string,
+  stock: number,
+  price: number,
+  rating: number,
+  thumbnail: string,
+  image_url: {
+    type: "array",
+    items: string,
   },
-  quantity: number,
-  // canceled: { type: "boolean" ,example:false},
 };
 
-const createCart = {
-  tags: ["Carts"],
-  description: "Create cart ",
+const createWishlist = {
+  tags: ["Wishlist"],
+  description: "item added to wishlist successfully ",
   requestBody: {
     content: {
       "application/json": {
         schema: {
-          $ref: "#/components/schemas/createCartBody",
+          $ref: "#/components/schemas/createWishlistBody",
         },
       },
     },
@@ -48,7 +41,7 @@ const createCart = {
   ],
   responses: {
     201: {
-      description: "When cart item added successfully!",
+      description: "when wishlist created successfully!",
       content: {
         "application/json": {
           schema: {
@@ -59,37 +52,25 @@ const createCart = {
               },
               message: {
                 type: "string",
-                example: "item added successfully",
+                example: "item added to wishlist",
               },
-              _id: {
-                type: "string",
-              },
-              userId: {
-                type: "string",
-              },
+              wishlist: {
+                type: "object",
+                properties: {
+                  _id: string,
+                  userId: string,
 
-              items: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    productId: { type: "string" },
-                    quantity: { type: "number" },
+                  products: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: product,
+                    },
                   },
-                },
-              },
-              totalPrice: {
-                type: "number",
-              },
-              totalItems: {
-                type: "number",
-              },
 
-              createdAt: {
-                type: "string",
-              },
-              updatedAt: {
-                type: "string",
+                  createdAt: string,
+                  updatedAt: string,
+                },
               },
             },
           },
@@ -115,10 +96,22 @@ const createCart = {
   },
 };
 
-const getCartDetails = {
-  tags: ["Carts"],
-  description: "getCartDetails  ",
 
+
+
+const getWishlist = {
+  tags: ["Wishlist"],
+  description: "get wishlist successfully ",
+//   requestBody: {
+//     content: {
+//       "application/json": {
+//         schema: {
+//           $ref: "#/components/schemas/createWishlistBody",
+//         },
+//       },
+//     },
+//     required: true,
+//   },
   security: [
     {
       ApiKeyAuth: [],
@@ -126,7 +119,7 @@ const getCartDetails = {
   ],
   responses: {
     201: {
-      description: "When getCartDetails successfully!",
+      description: "when get  wishlist  successfully!",
       content: {
         "application/json": {
           schema: {
@@ -137,34 +130,25 @@ const getCartDetails = {
               },
               message: {
                 type: "string",
-                example: "successful",
+                example: "success",
               },
-              cart: {
+              wishlist: {
                 type: "object",
                 properties: {
-                  _id: { type: "string" },
-                  userId: { type: "string" },
-                  items: {
+                  _id: string,
+                  userId: string,
+
+                  products: {
                     type: "array",
                     items: {
                       type: "object",
                       properties: product,
                     },
                   },
-                },
-              },
-              totalPrice: {
-                type: "number",
-              },
-              totalItems: {
-                type: "number",
-              },
 
-              createdAt: {
-                type: "string",
-              },
-              updatedAt: {
-                type: "string",
+                  createdAt: string,
+                  updatedAt: string,
+                },
               },
             },
           },
@@ -190,14 +174,17 @@ const getCartDetails = {
   },
 };
 
-const updateCart = {
-  tags: ["Carts"],
-  description: "update cart ",
+
+
+
+const updateWishlist = {
+  tags: ["Wishlist"],
+  description: "wishlist updated ",
   requestBody: {
     content: {
       "application/json": {
         schema: {
-          $ref: "#/components/schemas/updateCartBody",
+          $ref: "#/components/schemas/updateWishlistBody",
         },
       },
     },
@@ -210,7 +197,7 @@ const updateCart = {
   ],
   responses: {
     201: {
-      description: "When cart updated successfully!",
+      description: "when wishlist updated successfully!",
       content: {
         "application/json": {
           schema: {
@@ -221,37 +208,24 @@ const updateCart = {
               },
               message: {
                 type: "string",
-                example: "cart updated successfully",
+                example: "success",
               },
-              cart: {
+              wishlist: {
                 type: "object",
                 properties: {
-                  _id: {
-                    type: "string",
-                  },
-                  userId: {
-                    type: "string",
-                  },
-                  items: {
+                  _id: string,
+                  userId: string,
+
+                  products: {
                     type: "array",
                     items: {
                       type: "object",
                       properties: product,
                     },
                   },
-                  totalPrice: {
-                    type: "number",
-                  },
-                  totalItems: {
-                    type: "number",
-                  },
 
-                  createdAt: {
-                    type: "string",
-                  },
-                  updatedAt: {
-                    type: "string",
-                  },
+                  createdAt: string,
+                  updatedAt: string,
                 },
               },
             },
@@ -278,7 +252,9 @@ const updateCart = {
   },
 };
 
-const createCartBody = {
+
+
+const createWishlistBody = {
   type: "object",
   properties: {
     productId: {
@@ -288,25 +264,22 @@ const createCartBody = {
   },
 };
 
-const updateCartBody = {
+
+
+const updateWishlistBody = {
   type: "object",
   properties: {
     productId: {
       type: "string",
       example: "65113885ebf4076b07976269",
-    },
-    quantity: {
-      type: "number",
-      example: 1,
     },
   },
 };
 
 module.exports = {
-  createCartBody,
-  createCart,
-  getCartDetails,
-  updateCart,
-  updateCartBody,
-  product,
+  createWishlist,
+  createWishlistBody,
+  getWishlist,
+  updateWishlist,
+  updateWishlistBody,
 };

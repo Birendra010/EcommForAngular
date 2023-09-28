@@ -1,19 +1,24 @@
+const string = {
+  type: "string",
+};
+const number = {
+  type: "number",
+};
+
 const product = {
-  _id: { type: "string" },
-  title: { type: "string" },
-  description: { type: "string" },
-  price: { type: "number" },
-  discountPercentage: { type: "number" },
-  rating: { type: "number" },
-  brand: { type: "string" },
-  stock: { type: "number" },
-  category: {
-    type: "string",
-  },
-  thumbnail: { type: "string" },
+  _id: string,
+  title: string,
+  description: string,
+  price: number,
+  discountPercentage: number,
+  rating: number,
+  brand: string,
+  stock: number,
+  category: string,
+  thumbnail: string,
   image_url: {
     type: "array",
-    items: { type: "string" },
+    items: string,
   },
 };
 
@@ -247,6 +252,3 @@ module.exports = {
   getAllproducts,
   getProductById,
 };
-
-
-
